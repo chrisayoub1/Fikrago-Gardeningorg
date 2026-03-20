@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subscribe to Seed-to-Soil Box - Fikrago Gardening</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Custom styles */
+    .paypal-buttons {
+      min-height: 50px;
+    }
+    .loading-spinner {
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <div class="container mx-auto px-4 py-12">
+    <!-- Header -->
+    <header class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">Seed-to-Soil Monthly Box</h1>
+      <p class="text-gray-600">$29/month • Cancel anytime</p>
+    </header>
+
+    <!-- Main Content -->
+    <div class="max-w-2xl mx-auto">
+      <!-- Features Card -->
+      <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+        <h2 class="font-semibold text-lg mb-4">What's Included:</h2>
+        <ul class="space-y-3">
+          <li class="flex items-center gap-3">
+            <svg class="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <span>5-7 curated gardening products monthly</span>
+          </li>
+          <li class="flex items-center gap-3">
+            <svg class="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <span>Seasonal seed varieties</span>
+          </li>
+          <li class="flex items-center gap-3">
+            <svg class="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <span>Premium soil amendments</span>
+          </li>
+          <li class="flex items-center gap-3">
+            <svg class="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <span>Expert growing guides</span>
+          </li>
+          <li class="flex items-center gap-3">
+            <svg class="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <span>Free shipping included</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Shipping Form -->
+      <form id="shippingForm" class="bg-white rounded-xl shadow-sm p-6 mb-6">
+        <h2 class="font-semibold text-lg mb-4">Shipping Address</h2>
+        
+        <div class="grid gap-4 sm:grid-cols-2 mb-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+            <input type="text" id="firstName" required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+            <input type="text" id="lastName" required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+          <input type="email" id="email" required
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Address Line 1 *</label>
+          <input type="text" id="address1" required
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Address Line 2</label>
+          <input type="text" id="address2"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-3">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">City *</label>
+            <input type="text" id="city" required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">State *</label>
+            <input type="text" id="state" required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">ZIP Code *</label>
+            <input type="text" id="zip" required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
+          </div>
+        </div>
+      </form>
+
+      <!-- Payment Section -->
+      <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="font-semibold text-lg">Subscribe Now</h2>
+          <div class="text-right">
+            <p class="text-2xl font-bold">$29</p>
+            <p class="text-sm text-gray-500">/month</p>
+          </div>
+        </div>
+
+        <!-- PayPal Button Container -->
+        <div id="paypal-button-container" class="paypal-buttons">
+          <div id="loading" class="flex items-center justify-center py-4">
+            <svg class="loading-spinner h-6 w-6 text-amber-500" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span class="ml-2 text-gray-600">Loading PayPal...</span>
+          </div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="error-message" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mt-4">
+        </div>
+
+        <!-- Terms -->
+        <p class="text-xs text-gray-500 text-center mt-4">
+          By subscribing, you agree to be charged $29/month until you cancel.
+          <br>You can cancel anytime from your account settings.
+        </p>
+      </div>
+
+      <!-- Trust Badges -->
+      <div class="flex justify-center gap-8 mt-8 text-center">
+        <div>
+          <svg class="h-8 w-8 text-emerald-600 mx-auto mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+          <p class="text-sm text-gray-600">Secure</p>
+        </div>
+        <div>
+          <svg class="h-8 w-8 text-emerald-600 mx-auto mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+          <p class="text-sm text-gray-600">Free Shipping</p>
+        </div>
+        <div>
+          <svg class="h-8 w-8 text-emerald-600 mx-auto mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <p class="text-sm text-gray-600">Cancel Anytime</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Configuration - Update these values
+    const CONFIG = {
+      // PayPal Client ID (from your PayPal Developer Dashboard)
+      PAYPAL_CLIENT_ID: 'AZhZpOus2lbZl-4nT-1QJTKsMOPTCZVA1bWPAcupTfOsR5TquLcVf7UK3UXQoKZjQwwHVESPCiEbb9Q4',
+      // Your API endpoints
+      API_BASE: window.location.origin,
+      // PayPal Plan ID (created by running scripts/create-paypal-plan.ts)
+      PLAN_ID: 'SEED-SOIL-MONTHLY-LIVE', // Update this after running the script
+    };
+
+    // Get shipping address from form
+    function getShippingAddress() {
+      return {
+        firstName: document.getElementById('firstName').value,
+        lastName: document.getElementById('lastName').value,
+        email: document.getElementById('email').value,
+        addressLine1: document.getElementById('address1').value,
+        addressLine2: document.getElementById('address2').value,
+        city: document.getElementById('city').value,
+        state: document.getElementById('state').value,
+        zipCode: document.getElementById('zip').value,
+        country: 'United States',
+      };
+    }
+
+    // Validate form
+    function validateForm() {
+      const fields = ['firstName', 'lastName', 'email', 'address1', 'city', 'state', 'zip'];
+      for (const field of fields) {
+        const el = document.getElementById(field);
+        if (!el.value.trim()) {
+          el.focus();
+          showError('Please fill in all required fields');
+          return false;
+        }
+      }
+      return true;
+    }
+
+    // Show error message
+    function showError(message) {
+      const errorEl = document.getElementById('error-message');
+      errorEl.textContent = message;
+      errorEl.classList.remove('hidden');
+      setTimeout(() => errorEl.classList.add('hidden'), 5000);
+    }
+
+    // Create subscription via API
+    async function createSubscription() {
+      if (!validateForm()) {
+        return Promise.reject('Validation failed');
+      }
+
+      const shippingAddress = getShippingAddress();
+      
+      const response = await fetch(`${CONFIG.API_BASE}/api/paypal/create-subscription`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ shippingAddress }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to create subscription');
+      }
+
+      const data = await response.json();
+      return data.subscriptionId;
+    }
+
+    // Handle subscription approval
+    async function onApprove(data) {
+      const shippingAddress = getShippingAddress();
+      
+      try {
+        const response = await fetch(`${CONFIG.API_BASE}/api/paypal/capture-subscription`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            paypalSubscriptionId: data.subscriptionID,
+            shippingAddress,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to activate subscription');
+        }
+
+        const result = await response.json();
+        
+        // Redirect to success page
+        window.location.href = `${CONFIG.API_BASE}/subscription-success?id=${result.subscription.id}`;
+      } catch (error) {
+        console.error('Subscription error:', error);
+        showError('Subscription activation failed. Please contact support.');
+      }
+    }
+
+    // Load PayPal SDK
+    function loadPayPalSDK() {
+      const script = document.createElement('script');
+      script.src = `https://www.paypal.com/sdk/js?client-id=${CONFIG.PAYPAL_CLIENT_ID}&currency=USD&intent=subscription&vault=true`;
+      script.onload = renderPayPalButtons;
+      script.onerror = () => {
+        document.getElementById('loading').innerHTML = 
+          '<p class="text-red-600">Failed to load PayPal. Please refresh the page.</p>';
+      };
+      document.head.appendChild(script);
+    }
+
+    // Render PayPal buttons
+    function renderPayPalButtons() {
+      document.getElementById('loading').innerHTML = '';
+      
+      if (!window.paypal) {
+        showError('PayPal not loaded. Please refresh the page.');
+        return;
+      }
+
+      window.paypal.Buttons({
+        createSubscription: createSubscription,
+        onApprove: onApprove,
+        onError: function(err) {
+          console.error('PayPal error:', err);
+          showError('PayPal payment failed. Please try again.');
+        },
+        style: {
+          layout: 'vertical',
+          color: 'gold',
+          shape: 'rect',
+          label: 'subscribe',
+          height: 50,
+        },
+      }).render('#paypal-button-container').catch(function(err) {
+        console.error('Failed to render PayPal buttons:', err);
+        showError('Failed to load payment buttons. Please refresh the page.');
+      });
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', loadPayPalSDK);
+  </script>
+</body>
+</html>

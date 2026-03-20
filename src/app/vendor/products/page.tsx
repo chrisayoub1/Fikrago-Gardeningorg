@@ -1,0 +1,554 @@
+"use client";
+
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Plus,
+  Search,
+  MoreHorizontal,
+  Edit,
+  Trash2,
+  Eye,
+  Copy,
+  Package,
+  Filter,
+  Download,
+  ChevronDown,
+} from "lucide-react";
+
+// Mock products data
+const mockProducts = [
+  {
+    id: "prod_001",
+    name: "Premium Organic Compost Mix",
+    sku: "POC-001",
+    price: 29.99,
+    comparePrice: 34.99,
+    stock: 156,
+    status: "ACTIVE",
+    category: "Soil Amendments",
+    sales: 234,
+    image: null,
+  },
+  {
+    id: "prod_002",
+    name: "Heirloom Tomato Seeds - Mixed Variety",
+    sku: "HTS-002",
+    price: 19.99,
+    comparePrice: null,
+    stock: 89,
+    status: "ACTIVE",
+    category: "Seeds",
+    sales: 189,
+    image: null,
+  },
+  {
+    id: "prod_003",
+    name: "Organic Fertilizer 5lb Bag",
+    sku: "OFS-003",
+    price: 24.99,
+    comparePrice: 29.99,
+    stock: 0,
+    status: "OUT_OF_STOCK",
+    category: "Fertilizers",
+    sales: 156,
+    image: null,
+  },
+  {
+    id: "prod_004",
+    name: "Professional Garden Tool Set",
+    sku: "GTS-004",
+    price: 49.99,
+    comparePrice: null,
+    stock: 42,
+    status: "ACTIVE",
+    category: "Tools",
+    sales: 98,
+    image: null,
+  },
+  {
+    id: "prod_005",
+    name: "Soil pH Test Kit",
+    sku: "SPT-005",
+    price: 18.99,
+    comparePrice: 22.99,
+    stock: 67,
+    status: "ACTIVE",
+    category: "Tools",
+    sales: 87,
+    image: null,
+  },
+  {
+    id: "prod_006",
+    name: "Bamboo Plant Markers Set (50pcs)",
+    sku: "BPM-006",
+    price: 12.99,
+    comparePrice: null,
+    stock: 234,
+    status: "DRAFT",
+    category: "Accessories",
+    sales: 0,
+    image: null,
+  },
+  {
+    id: "prod_007",
+    name: "Vermicompost - Worm Castings 10lb",
+    sku: "VWC-007",
+    price: 34.99,
+    comparePrice: 39.99,
+    stock: 78,
+    status: "ACTIVE",
+    category: "Soil Amendments",
+    sales: 145,
+    image: null,
+  },
+  {
+    id: "prod_008",
+    name: "Drip Irrigation Kit - 50ft",
+    sku: "DIK-008",
+    price: 59.99,
+    comparePrice: null,
+    stock: 23,
+    status: "ACTIVE",
+    category: "Irrigation",
+    sales: 67,
+    image: null,
+  },
+];
+
+const statusColors: Record<string, { bg: string; text: string }> = {
+  ACTIVE: { bg: "bg-emerald-100", text: "text-emerald-800" },
+  DRAFT: { bg: "bg-gray-100", text: "text-gray-800" },
+  OUT_OF_STOCK: { bg: "bg-red-100", text: "text-red-800" },
+  PENDING_APPROVAL: { bg: "bg-yellow-100", text: "text-yellow-800" },
+};
+
+const categories = [
+  "Soil Amendments",
+  "Seeds",
+  "Fertilizers",
+  "Tools",
+  "Accessories",
+  "Irrigation",
+  "Pest Control",
+  "Planters",
+];
+
+export default function ProductsPage() {
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<typeof mockProducts[0] | null>(null);
+
+  const filteredProducts = mockProducts.filter((product) => {
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.sku.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === "all" || product.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const toggleSelectAll = () => {
+    if (selectedProducts.length === filteredProducts.length) {
+      setSelectedProducts([]);
+    } else {
+      setSelectedProducts(filteredProducts.map((p) => p.id));
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedProducts((prev) =>
+      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
+    );
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Products</h1>
+          <p className="text-gray-500">Manage your product catalog</p>
+        </div>
+        <div className="flex gap-3">
+          <Button variant="outline" className="border-gray-200">
+            <Download className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-emerald-600 hover:bg-emerald-700">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Product
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Add New Product</DialogTitle>
+                <DialogDescription>
+                  Fill in the details to add a new product to your catalog.
+                </DialogDescription>
+              </DialogHeader>
+              <ProductForm onClose={() => setIsAddDialogOpen(false)} />
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid gap-4 sm:grid-cols-4">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold text-gray-900">24</div>
+            <p className="text-sm text-gray-500">Total Products</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold text-emerald-600">18</div>
+            <p className="text-sm text-gray-500">Active</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold text-gray-600">4</div>
+            <p className="text-sm text-gray-500">Drafts</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold text-red-600">2</div>
+            <p className="text-sm text-gray-500">Out of Stock</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters and Search */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search products by name or SKU..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <Filter className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="ACTIVE">Active</SelectItem>
+                <SelectItem value="DRAFT">Draft</SelectItem>
+                <SelectItem value="OUT_OF_STOCK">Out of Stock</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Bulk Actions */}
+      {selectedProducts.length > 0 && (
+        <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 flex items-center justify-between">
+          <span className="text-sm font-medium text-emerald-800">
+            {selectedProducts.length} product(s) selected
+          </span>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" className="border-emerald-200 text-emerald-700">
+              Activate Selected
+            </Button>
+            <Button variant="outline" size="sm" className="border-red-200 text-red-700 hover:bg-red-50">
+              Delete Selected
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Products Table */}
+      <Card>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-12">
+                  <Checkbox
+                    checked={selectedProducts.length === filteredProducts.length && filteredProducts.length > 0}
+                    onCheckedChange={toggleSelectAll}
+                  />
+                </TableHead>
+                <TableHead>Product</TableHead>
+                <TableHead className="hidden md:table-cell">SKU</TableHead>
+                <TableHead>Price</TableHead>
+                <TableHead className="hidden sm:table-cell">Stock</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="hidden lg:table-cell">Sales</TableHead>
+                <TableHead className="w-[50px]"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredProducts.map((product) => (
+                <TableRow key={product.id}>
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedProducts.includes(product.id)}
+                      onCheckedChange={() => toggleSelect(product.id)}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-emerald-100 to-green-100 flex items-center justify-center shrink-0">
+                        <Package className="h-6 w-6 text-emerald-600" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-medium text-gray-900 truncate">{product.name}</p>
+                        <p className="text-xs text-gray-500">{product.category}</p>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell font-mono text-sm text-gray-500">
+                    {product.sku}
+                  </TableCell>
+                  <TableCell>
+                    <div>
+                      <p className="font-medium text-gray-900">${product.price.toFixed(2)}</p>
+                      {product.comparePrice && (
+                        <p className="text-xs text-gray-400 line-through">
+                          ${product.comparePrice.toFixed(2)}
+                        </p>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="hidden sm:table-cell">
+                    <span className={product.stock === 0 ? "text-red-600 font-medium" : ""}>
+                      {product.stock}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      className={`${statusColors[product.status].bg} ${statusColors[product.status].text} border-0`}
+                    >
+                      {product.status.replace("_", " ")}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="hidden lg:table-cell text-gray-500">
+                    {product.sales}
+                  </TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem>
+                          <Eye className="h-4 w-4 mr-2" />
+                          View
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setEditingProduct(product)}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <Copy className="h-4 w-4 mr-2" />
+                          Duplicate
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="text-red-600">
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* Edit Product Dialog */}
+      <Dialog open={!!editingProduct} onOpenChange={() => setEditingProduct(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Product</DialogTitle>
+            <DialogDescription>
+              Update the product details.
+            </DialogDescription>
+          </DialogHeader>
+          <ProductForm product={editingProduct} onClose={() => setEditingProduct(null)} />
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function ProductForm({ product, onClose }: { product?: typeof mockProducts[0] | null; onClose: () => void }) {
+  return (
+    <div className="space-y-6 py-4">
+      <div className="space-y-4">
+        <div>
+          <Label htmlFor="name">Product Name *</Label>
+          <Input
+            id="name"
+            placeholder="Enter product name"
+            defaultValue={product?.name || ""}
+            className="mt-1.5"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="description">Description</Label>
+          <Textarea
+            id="description"
+            placeholder="Describe your product..."
+            className="mt-1.5 min-h-[100px]"
+            defaultValue=""
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="price">Price ($) *</Label>
+            <Input
+              id="price"
+              type="number"
+              step="0.01"
+              placeholder="0.00"
+              defaultValue={product?.price || ""}
+              className="mt-1.5"
+            />
+          </div>
+          <div>
+            <Label htmlFor="comparePrice">Compare at Price ($)</Label>
+            <Input
+              id="comparePrice"
+              type="number"
+              step="0.01"
+              placeholder="0.00"
+              defaultValue={product?.comparePrice || ""}
+              className="mt-1.5"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="sku">SKU</Label>
+            <Input
+              id="sku"
+              placeholder="SKU-001"
+              defaultValue={product?.sku || ""}
+              className="mt-1.5"
+            />
+          </div>
+          <div>
+            <Label htmlFor="stock">Stock Quantity</Label>
+            <Input
+              id="stock"
+              type="number"
+              placeholder="0"
+              defaultValue={product?.stock || 0}
+              className="mt-1.5"
+            />
+          </div>
+        </div>
+
+        <div>
+          <Label htmlFor="category">Category</Label>
+          <Select defaultValue={product?.category || ""}>
+            <SelectTrigger className="mt-1.5">
+              <SelectValue placeholder="Select a category" />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map((cat) => (
+                <SelectItem key={cat} value={cat}>
+                  {cat}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="status">Status</Label>
+          <Select defaultValue={product?.status || "DRAFT"}>
+            <SelectTrigger className="mt-1.5">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ACTIVE">Active</SelectItem>
+              <SelectItem value="DRAFT">Draft</SelectItem>
+              <SelectItem value="OUT_OF_STOCK">Out of Stock</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label>Product Images</Label>
+          <div className="mt-1.5 border-2 border-dashed border-gray-200 rounded-lg p-8 text-center hover:border-emerald-300 transition-colors cursor-pointer">
+            <Package className="h-10 w-10 text-gray-400 mx-auto mb-2" />
+            <p className="text-sm text-gray-500">
+              Drop images here or click to upload
+            </p>
+            <p className="text-xs text-gray-400 mt-1">
+              PNG, JPG up to 5MB
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <DialogFooter>
+        <Button variant="outline" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={onClose}>
+          {product ? "Save Changes" : "Add Product"}
+        </Button>
+      </DialogFooter>
+    </div>
+  );
+}
