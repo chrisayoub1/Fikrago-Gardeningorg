@@ -100,6 +100,10 @@ export async function POST(request: NextRequest) {
       width,
       height,
       freeShipping,
+      bulkPrice,
+      minOrderQuantity,
+      climateZone,
+      growingSeason,
     } = body;
 
     // Generate slug from name
@@ -126,6 +130,10 @@ export async function POST(request: NextRequest) {
         width: width ? parseFloat(width) : null,
         height: height ? parseFloat(height) : null,
         freeShipping: freeShipping || false,
+        bulkPrice: bulkPrice ? parseFloat(bulkPrice) : null,
+        minOrderQuantity: minOrderQuantity ? parseInt(minOrderQuantity) : null,
+        climateZone: climateZone || "All",
+        growingSeason: growingSeason || null,
         vendorId: session.user.id,
         status: "PENDING_APPROVAL",
       },

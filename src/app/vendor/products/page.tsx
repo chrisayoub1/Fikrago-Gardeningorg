@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -51,7 +51,10 @@ import {
   Filter,
   Download,
   ChevronDown,
+  Leaf,
+  Loader2,
 } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 // Mock products data
 const mockProducts = [
@@ -177,6 +180,18 @@ export default function ProductsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<typeof mockProducts[0] | null>(null);
+  const [realCategories, setRealCategories] = useState<{id: string, name: string}[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/categories")
+      .then(res => res.json())
+      .then(data => {
+        setRealCategories(data);
+        setLoading(false);
+      })
+      .catch(err => console.error("Error fetching categories:", err));
+  }, []);
 
   const filteredProducts = mockProducts.filter((product) => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -226,7 +241,10 @@ export default function ProductsPage() {
                   Fill in the details to add a new product to your catalog.
                 </DialogDescription>
               </DialogHeader>
-              <ProductForm onClose={() => setIsAddDialogOpen(false)} />
+              <ProductForm 
+                categories={realCategories} 
+                onClose={() => setIsAddDialogOpen(false)} 
+              />
             </DialogContent>
           </Dialog>
         </div>
@@ -419,14 +437,67 @@ export default function ProductsPage() {
               Update the product details.
             </DialogDescription>
           </DialogHeader>
-          <ProductForm product={editingProduct} onClose={() => setEditingProduct(null)} />
+          <ProductForm 
+            product={editingProduct} 
+            categories={realCategories}
+            onClose={() => setEditingProduct(null)} 
+          />
         </DialogContent>
       </Dialog>
     </div>
   );
 }
 
-function ProductForm({ product, onClose }: { product?: typeof mockProducts[0] | null; onClose: () => void }) {
+function ProductForm({ 
+  product, 
+  categories,
+  onClose 
+}: { 
+  product?: any; 
+  categories: {id: string, name: string}[];
+  onClose: () => void 
+}) {
+  const [submitting, setSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: product?.name || "",
+    description: product?.description || "",
+    price: product?.price || "",
+    comparePrice: product?.comparePrice || "",
+    sku: product?.sku || "",
+    stock: product?.stock || 0,
+    categoryId: product?.categoryId || (categories[0]?.id || ""),
+    status: product?.status || "DRAFT",
+    climateZone: product?.climateZone || "All",
+    growingSeason: product?.growingSeason || "",
+    bulkPrice: product?.bulkPrice || "",
+    minOrderQuantity: product?.minOrderQuantity || "",
+  });
+
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    try {
+      const response = await fetch("/api/products", {
+        method: product ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        alert(product ? "Product updated!" : "Product created successfully!");
+        onClose();
+        window.location.reload(); 
+      } else {
+        const error = await response.json();
+        alert(`Error: ${error.error || "Failed to save"}`);
+      }
+    } catch (err) {
+      console.error("Submission error:", err);
+      alert("An unexpected error occurred.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div className="space-y-6 py-4">
       <div className="space-y-4">
@@ -435,7 +506,8 @@ function ProductForm({ product, onClose }: { product?: typeof mockProducts[0] | 
           <Input
             id="name"
             placeholder="Enter product name"
-            defaultValue={product?.name || ""}
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             className="mt-1.5"
           />
         </div>
@@ -446,7 +518,8 @@ function ProductForm({ product, onClose }: { product?: typeof mockProducts[0] | 
             id="description"
             placeholder="Describe your product..."
             className="mt-1.5 min-h-[100px]"
-            defaultValue=""
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
           />
         </div>
 
@@ -458,7 +531,8 @@ function ProductForm({ product, onClose }: { product?: typeof mockProducts[0] | 
               type="number"
               step="0.01"
               placeholder="0.00"
-              defaultValue={product?.price || ""}
+              value={formData.price}
+              onChange={(e) => setFormData({ ...formData, price: e.target.value })}
               className="mt-1.5"
             />
           </div>
@@ -469,7 +543,8 @@ function ProductForm({ product, onClose }: { product?: typeof mockProducts[0] | 
               type="number"
               step="0.01"
               placeholder="0.00"
-              defaultValue={product?.comparePrice || ""}
+              value={formData.comparePrice}
+              onChange={(e) => setFormData({ ...formData, comparePrice: e.target.value })}
               className="mt-1.5"
             />
           </div>
@@ -481,7 +556,8 @@ function ProductForm({ product, onClose }: { product?: typeof mockProducts[0] | 
             <Input
               id="sku"
               placeholder="SKU-001"
-              defaultValue={product?.sku || ""}
+              value={formData.sku}
+              onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
               className="mt-1.5"
             />
           </div>
@@ -491,40 +567,111 @@ function ProductForm({ product, onClose }: { product?: typeof mockProducts[0] | 
               id="stock"
               type="number"
               placeholder="0"
-              defaultValue={product?.stock || 0}
+              value={formData.stock}
+              onChange={(e) => setFormData({ ...formData, stock: parseInt(e.target.value) || 0 })}
               className="mt-1.5"
             />
           </div>
         </div>
 
-        <div>
-          <Label htmlFor="category">Category</Label>
-          <Select defaultValue={product?.category || ""}>
-            <SelectTrigger className="mt-1.5">
-              <SelectValue placeholder="Select a category" />
-            </SelectTrigger>
-            <SelectContent>
-              {categories.map((cat) => (
-                <SelectItem key={cat} value={cat}>
-                  {cat}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="status">Status</Label>
+            <Select 
+              value={formData.status} 
+              onValueChange={(val) => setFormData({ ...formData, status: val })}
+            >
+              <SelectTrigger className="mt-1.5">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ACTIVE">Active</SelectItem>
+                <SelectItem value="DRAFT">Draft</SelectItem>
+                <SelectItem value="OUT_OF_STOCK">Out of Stock</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="category">Category</Label>
+            <Select 
+              value={formData.categoryId} 
+              onValueChange={(val) => setFormData({ ...formData, categoryId: val })}
+            >
+              <SelectTrigger className="mt-1.5">
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
-        <div>
-          <Label htmlFor="status">Status</Label>
-          <Select defaultValue={product?.status || "DRAFT"}>
-            <SelectTrigger className="mt-1.5">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ACTIVE">Active</SelectItem>
-              <SelectItem value="DRAFT">Draft</SelectItem>
-              <SelectItem value="OUT_OF_STOCK">Out of Stock</SelectItem>
-            </SelectContent>
-          </Select>
+        <Separator className="my-4" />
+        <h3 className="text-sm font-semibold text-emerald-800 flex items-center gap-2">
+          <Leaf className="h-4 w-4" />
+          Strategic Marketplace Data (2026 Optimization)
+        </h3>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="climateZone">Climate Zone Compatibility</Label>
+            <Select 
+              value={formData.climateZone} 
+              onValueChange={(val) => setFormData({ ...formData, climateZone: val })}
+            >
+              <SelectTrigger className="mt-1.5">
+                <SelectValue placeholder="Select Zone" />
+              </SelectTrigger>
+              <SelectContent>
+                {["All", "Zone 1-3", "Zone 4-6", "Zone 7-9", "Zone 10-12"].map((zone) => (
+                  <SelectItem key={zone} value={zone}>
+                    {zone}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="growingSeason">Growing Season</Label>
+            <Input
+              id="growingSeason"
+              placeholder="e.g. Spring/Summer"
+              value={formData.growingSeason}
+              onChange={(e) => setFormData({ ...formData, growingSeason: e.target.value })}
+              className="mt-1.5"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="bulkPrice">B2B Bulk Price ($)</Label>
+            <Input
+              id="bulkPrice"
+              type="number"
+              step="0.01"
+              placeholder="Wholesale price"
+              value={formData.bulkPrice}
+              onChange={(e) => setFormData({ ...formData, bulkPrice: e.target.value })}
+              className="mt-1.5"
+            />
+          </div>
+          <div>
+            <Label htmlFor="minOrderQuantity">Min Bulk Order Qty</Label>
+            <Input
+              id="minOrderQuantity"
+              type="number"
+              placeholder="e.g. 10"
+              value={formData.minOrderQuantity}
+              onChange={(e) => setFormData({ ...formData, minOrderQuantity: e.target.value })}
+              className="mt-1.5"
+            />
+          </div>
         </div>
 
         <div>
@@ -542,11 +689,22 @@ function ProductForm({ product, onClose }: { product?: typeof mockProducts[0] | 
       </div>
 
       <DialogFooter>
-        <Button variant="outline" onClick={onClose}>
+        <Button variant="outline" onClick={onClose} disabled={submitting}>
           Cancel
         </Button>
-        <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={onClose}>
-          {product ? "Save Changes" : "Add Product"}
+        <Button 
+          className="bg-emerald-600 hover:bg-emerald-700" 
+          onClick={handleSubmit}
+          disabled={submitting}
+        >
+          {submitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            product ? "Save Changes" : "Add Product"
+          )}
         </Button>
       </DialogFooter>
     </div>

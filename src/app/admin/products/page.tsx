@@ -63,6 +63,7 @@ import {
   FileText,
   Shield,
   Ban,
+  Leaf,
 } from "lucide-react";
 
 // Mock product data
@@ -668,6 +669,37 @@ export default function ProductsModeration() {
                     <p className="text-green-600 font-semibold">
                       ${(selectedProduct.price * 0.15).toFixed(2)} per sale
                     </p>
+                  </div>
+
+                  <div className="col-span-2 pt-4 border-t">
+                    <h4 className="text-sm font-semibold text-emerald-800 flex items-center gap-2 mb-4">
+                      <Leaf className="h-4 w-4" />
+                      Strategic Marketplace Data (2026)
+                    </h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label className="text-muted-foreground">Climate Zone</Label>
+                        <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
+                          {(selectedProduct as any).climateZone || "All Zones"}
+                        </Badge>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-muted-foreground">Growing Season</Label>
+                        <p>{(selectedProduct as any).growingSeason || "Not specified"}</p>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-muted-foreground">B2B Bulk Price</Label>
+                        <p className="font-semibold">
+                          {(selectedProduct as any).bulkPrice 
+                            ? `$${(selectedProduct as any).bulkPrice.toFixed(2)}` 
+                            : "Not offered"}
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-muted-foreground">Min Bulk Qty</Label>
+                        <p>{(selectedProduct as any).minOrderQuantity || "N/A"}</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
