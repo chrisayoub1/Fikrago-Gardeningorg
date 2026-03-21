@@ -187,10 +187,14 @@ export default function ProductsPage() {
     fetch("/api/categories")
       .then(res => res.json())
       .then(data => {
-        setRealCategories(data);
+        setRealCategories(Array.isArray(data) ? data : []);
         setLoading(false);
       })
-      .catch(err => console.error("Error fetching categories:", err));
+      .catch(err => {
+        console.error("Error fetching categories:", err);
+        setRealCategories([]);
+        setLoading(false);
+      });
   }, []);
 
   const filteredProducts = mockProducts.filter((product) => {
