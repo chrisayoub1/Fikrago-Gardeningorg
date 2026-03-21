@@ -26,6 +26,7 @@ interface Message {
 
 export function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isMaximized, setIsMaximized] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -169,9 +170,14 @@ export function Chatbot() {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
-      <Card className="w-96 max-w-[calc(100vw-2rem)] shadow-2xl">
-        <CardHeader className="p-4 bg-emerald-600 rounded-t-lg">
+    <div className={cn(
+      "fixed z-50 transition-all duration-300 ease-in-out",
+      isMaximized 
+        ? "inset-4 sm:inset-auto sm:bottom-6 sm:right-6 sm:w-[550px] sm:h-[700px]" 
+        : "bottom-0 right-0 w-full sm:bottom-6 sm:right-6 sm:w-[420px] h-[75vh] sm:h-auto"
+    )}>
+      <Card className="h-full shadow-2xl flex flex-col overflow-hidden border-emerald-100">
+        <CardHeader className="p-4 bg-emerald-600 shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
@@ -179,22 +185,38 @@ export function Chatbot() {
               </div>
               <div>
                 <CardTitle className="text-white text-base">Fikra</CardTitle>
-                <p className="text-emerald-100 text-xs">Gardening Assistant</p>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-300 animate-pulse" />
+                  <p className="text-emerald-100 text-[10px] sm:text-xs">Gardening Assistant • Online</p>
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-1">
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/10"
-                onClick={() => setIsMinimized(true)}
+                className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/10 hidden sm:flex"
+                onClick={() => {
+                  setIsMaximized(!isMaximized);
+                  if (isMinimized) setIsMinimized(false);
+                }}
+                title={isMaximized ? "Restore" : "Maximize"}
               >
-                <Minimize2 className="h-4 w-4" />
+                {isMaximized ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/10"
+                onClick={() => setIsMinimized(true)}
+              >
+                <Minimize2 className="h-4 w-4 sm:hidden" />
+                <span className="hidden sm:inline text-xl leading-none -mt-1">—</span>
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/10 ml-0.5"
                 onClick={() => setIsOpen(false)}
               >
                 <X className="h-4 w-4" />
@@ -202,15 +224,18 @@ export function Chatbot() {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent className="p-0 flex-1 flex flex-col bg-white">
           {/* Messages */}
-          <ScrollArea className="h-80" ref={scrollRef}>
+          <ScrollArea className={cn(
+            "flex-1",
+            isMaximized ? "h-full" : "h-[350px] sm:h-[450px]"
+          )} ref={scrollRef}>
             <div className="p-4 space-y-4">
               {messages.map((msg, idx) => (
                 <div
                   key={idx}
                   className={cn(
-                    "flex gap-2",
+                    "flex gap-2 animate-in fade-in slide-in-from-bottom-2 duration-300",
                     msg.role === "user" && "justify-end"
                   )}
                 >
@@ -221,13 +246,19 @@ export function Chatbot() {
                   )}
                   <div
                     className={cn(
-                      "rounded-2xl px-4 py-2 max-w-[80%]",
+                      "rounded-2xl px-4 py-2 max-w-[85%] shadow-sm",
                       msg.role === "user"
-                        ? "bg-emerald-600 text-white"
-                        : "bg-gray-100 text-gray-800"
+                        ? "bg-emerald-600 text-white rounded-tr-none"
+                        : "bg-gray-100 text-gray-800 rounded-tl-none border border-gray-200/50"
                     )}
                   >
-                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                    <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                    <p className={cn(
+                      "text-[10px] mt-1 opacity-70",
+                      msg.role === "user" ? "text-right" : "text-left"
+                    )}>
+                      {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
                   </div>
                   {msg.role === "user" && (
                     <div className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center shrink-0">
@@ -237,12 +268,16 @@ export function Chatbot() {
                 </div>
               ))}
               {loading && (
-                <div className="flex gap-2">
+                <div className="flex gap-2 animate-pulse">
                   <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
                     <Bot className="h-4 w-4 text-emerald-600" />
                   </div>
-                  <div className="bg-gray-100 rounded-2xl px-4 py-3">
-                    <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+                  <div className="bg-gray-100 rounded-2xl px-4 py-3 rounded-tl-none border border-gray-200/50">
+                    <div className="flex gap-1">
+                      <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                      <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                      <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce font-bold"></span>
+                    </div>
                   </div>
                 </div>
               )}
@@ -251,15 +286,15 @@ export function Chatbot() {
 
           {/* Quick Actions */}
           {messages.length <= 1 && (
-            <div className="px-4 pb-2">
-              <p className="text-xs text-gray-500 mb-2">Quick questions:</p>
+            <div className="px-4 py-3 bg-gray-50/50 border-t border-gray-100">
+              <p className="text-[10px] uppercase font-semibold text-gray-400 mb-2 tracking-wider">Suggested for you</p>
               <div className="flex flex-wrap gap-2">
                 {quickActions.map((action, idx) => (
                   <Button
                     key={idx}
                     variant="outline"
                     size="sm"
-                    className="text-xs h-7 border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                    className="text-xs h-8 bg-white border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-300 transition-colors shadow-sm"
                     onClick={() => {
                       setInput(action);
                       setTimeout(() => sendMessage(), 100);
@@ -273,28 +308,29 @@ export function Chatbot() {
           )}
 
           {/* Input */}
-          <div className="p-4 border-t">
-            <div className="flex gap-2">
+          <div className="p-4 border-t bg-white">
+            <div className="flex gap-2 items-center">
               <Input
                 ref={inputRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Ask me anything..."
-                className="flex-1 border-gray-200 focus:border-emerald-500"
+                placeholder="Type your message..."
+                className="flex-1 h-10 border-gray-200 focus:border-emerald-500 focus-visible:ring-emerald-500 rounded-full px-4 text-sm"
                 disabled={loading}
               />
               <Button
                 onClick={sendMessage}
                 disabled={!input.trim() || loading}
-                className="bg-emerald-600 hover:bg-emerald-700 shrink-0"
+                className="bg-emerald-600 hover:bg-emerald-700 h-10 w-10 rounded-full shrink-0 shadow-md"
                 size="icon"
               >
-                <Send className="h-4 w-4" />
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
               </Button>
             </div>
-            <p className="text-xs text-gray-400 mt-2 text-center">
-              Powered by Fikrago AI
+            <p className="text-[10px] text-gray-400 mt-2 text-center flex items-center justify-center gap-1">
+              <Leaf className="h-3 w-3 text-emerald-400" />
+              Powered by Fikrago AI • Optimized for all devices
             </p>
           </div>
         </CardContent>
