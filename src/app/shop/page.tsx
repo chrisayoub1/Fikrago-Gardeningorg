@@ -46,11 +46,18 @@ interface Product {
   slug: string;
   price: number;
   comparePrice: number | null;
+  bulkPrice: number | null;
+  minOrderQuantity: number | null;
+  climateZone: string | null;
+  growingSeason: string | null;
   images: string[];
   vendor: {
     id: string;
     name: string | null;
-    vendorProfile: { businessName: string } | null;
+    vendorProfile: { 
+      businessName: string;
+      isVetted: boolean;
+    } | null;
   };
   category: { id: string; name: string } | null;
   rating: number;
@@ -90,6 +97,7 @@ export default function ShopPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [wishlist, setWishlist] = useState<string[]>([]);
+  const [selectedZones, setSelectedZones] = useState<string[]>([]);
 
   const { addItem } = useCartStore();
 
@@ -162,6 +170,13 @@ export default function ShopPage() {
       (product) => product.price >= priceRange[0] && product.price <= priceRange[1]
     );
 
+    // Climate Zone filter
+    if (selectedZones.length > 0) {
+      filtered = filtered.filter(
+        (product) => product.climateZone && selectedZones.includes(product.climateZone)
+      );
+    }
+
     // Sort
     switch (sortBy) {
       case "price-low":
@@ -228,6 +243,15 @@ export default function ShopPage() {
     );
   };
 
+  const toggleZone = (zone: string) => {
+    setSelectedZones((prev) =>
+      prev.includes(zone)
+        ? prev.filter((z) => z !== zone)
+        : [...prev, zone]
+    );
+    setCurrentPage(1);
+  };
+
   const handleAddToCart = (product: Product) => {
     addItem({
       productId: product.id,
@@ -243,6 +267,7 @@ export default function ShopPage() {
   const clearAllFilters = () => {
     setSelectedCategories([]);
     setSelectedRatings([]);
+    setSelectedZones([]);
     setPriceRange([0, maxPrice]);
     setSearchQuery("");
     setCurrentPage(1);
@@ -256,6 +281,7 @@ export default function ShopPage() {
   const hasActiveFilters =
     selectedCategories.length > 0 ||
     selectedRatings.length > 0 ||
+    selectedZones.length > 0 ||
     priceRange[0] > 0 ||
     priceRange[1] < maxPrice;
 
@@ -331,7 +357,37 @@ export default function ShopPage() {
 
       <Separator />
 
-      {/* Rating Filter */}
+      <Separator />
+
+      {/* Climate Zone */}
+      <div>
+        <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          Climate & Zone
+          {selectedZones.length > 0 && (
+            <Badge variant="secondary" className="text-xs">
+              {selectedZones.length}
+            </Badge>
+          )}
+        </h3>
+        <div className="space-y-3">
+          {["All", "Zone 1-3", "Zone 4-6", "Zone 7-9", "Zone 10-12"].map((zone) => (
+            <div key={zone} className="flex items-center space-x-3">
+              <Checkbox
+                id={`zone-${zone}`}
+                checked={selectedZones.includes(zone)}
+                onCheckedChange={() => toggleZone(zone)}
+                className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
+              />
+              <Label
+                htmlFor={`zone-${zone}`}
+                className="text-sm cursor-pointer flex-1"
+              >
+                {zone}
+              </Label>
+            </div>
+          ))}
+        </div>
+      </div>
       <div>
         <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
           Rating
@@ -589,6 +645,16 @@ export default function ShopPage() {
                         {product.isFeatured && !product.isBestseller && (
                           <Badge className="absolute top-3 left-3 bg-blue-500 text-white">
                             Featured
+                          </Badge>
+                        )}
+                        {product.bulkPrice && (
+                          <Badge className="absolute top-3 right-3 bg-orange-500 text-white border-0 z-10">
+                            Bulk Deals
+                          </Badge>
+                        )}
+                        {product.vendor?.vendorProfile?.isVetted && (
+                          <Badge className="absolute bottom-3 left-3 bg-white/90 text-emerald-700 border-emerald-200 backdrop-blur-sm">
+                            Vetted Expert
                           </Badge>
                         )}
                         <button

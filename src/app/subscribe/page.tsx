@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { cn } from "@/lib/utils";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
@@ -26,13 +27,22 @@ import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import Script from "next/script";
 
-const features = [
+const featuresStandard = [
   "5-7 curated gardening products",
   "Seasonal seed varieties",
   "Premium soil amendments",
-  "Expert growing guides",
+  "Expert growing guides (PDF)",
   "Exclusive member discounts",
-  "Cancel anytime - no commitment",
+  "Cancel anytime",
+];
+
+const featuresEnthusiast = [
+  "10-12 premium gardening products",
+  "Rare heirloom seed varieties",
+  "Advanced soil/microbe kits",
+  "1-on-1 Digital Support",
+  "Priority Shipping",
+  "Full Digital Success Portal",
 ];
 
 interface PayPalConfig {
@@ -49,6 +59,7 @@ export default function SubscribePage() {
   const [loading, setLoading] = useState(false);
   const [paypalConfig, setPaypalConfig] = useState<PayPalConfig | null>(null);
   const [paypalReady, setPaypalReady] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<"STANDARD" | "ENTHUSIAST">("STANDARD");
   const [shippingAddress, setShippingAddress] = useState({
     firstName: "",
     lastName: "",
@@ -89,6 +100,7 @@ export default function SubscribePage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         shippingAddress,
+        selectedPlan,
       }),
     });
 
@@ -177,58 +189,98 @@ export default function SubscribePage() {
       <main className="flex-1 bg-gray-50 min-h-screen">
         <div className="container mx-auto px-4 py-8">
           {/* Page Header */}
-          <div className="text-center mb-8">
-            <Badge className="bg-amber-500 text-white mb-4">Monthly Subscription</Badge>
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Seed-to-Soil Monthly Box
+          <div className="text-center mb-12">
+            <Badge className="bg-emerald-600 text-white mb-4">Regenerative Subscriptions</Badge>
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
+              Seed-to-Soil Experience
             </h1>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              Get a curated box of regenerative gardening products delivered to your door every month.
+              Join the movement. Choose the plan that fits your garden goals and restore your soil biodiversity.
             </p>
           </div>
 
+          {/* Plan Selection Row */}
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-12">
+            {/* Standard Plan */}
+            <Card 
+              className={cn(
+                "relative cursor-pointer transition-all border-2",
+                selectedPlan === "STANDARD" ? "border-emerald-600 shadow-lg" : "border-transparent opacity-80 hover:opacity-100"
+              )}
+              onClick={() => setSelectedPlan("STANDARD")}
+            >
+              <CardHeader className="text-center">
+                <CardTitle className="text-xl">Garden Starter</CardTitle>
+                <div className="mt-2">
+                  <span className="text-3xl font-bold">$29</span>
+                  <span className="text-gray-500">/mo</span>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 mb-6">
+                  {featuresStandard.map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-sm">
+                      <CheckCircle className="h-4 w-4 text-emerald-500" /> {f}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Enthusiast Plan (The $79 Goal) */}
+            <Card 
+              className={cn(
+                "relative cursor-pointer transition-all border-2",
+                selectedPlan === "ENTHUSIAST" ? "border-emerald-600 shadow-xl" : "border-transparent opacity-80 hover:opacity-100"
+              )}
+              onClick={() => setSelectedPlan("ENTHUSIAST")}
+            >
+              <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 hover:bg-amber-600 border-none px-4 py-1 text-xs">
+                RECOMMENDED: BEST FOR GROWTH
+              </Badge>
+              <CardHeader className="text-center">
+                <CardTitle className="text-xl">Garden Enthusiast</CardTitle>
+                <div className="mt-2">
+                  <span className="text-3xl font-bold">$79</span>
+                  <span className="text-gray-500">/mo</span>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 mb-6">
+                  {featuresEnthusiast.map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-sm">
+                      <CheckCircle className="h-4 w-4 text-amber-500" /> {f}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+
           <div className="grid gap-8 lg:grid-cols-3 max-w-6xl mx-auto">
-            {/* Left - Features */}
+            {/* Left - Why subscribe */}
             <div className="lg:col-span-1">
-              <Card className="sticky top-24">
+              <Card className="sticky top-24 border-0 shadow-sm bg-gray-50/50">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Package className="h-5 w-5 text-amber-500" />
-                    What&apos;s Included
+                  <CardTitle className="flex items-center gap-2 text-emerald-800">
+                    <Gift className="h-5 w-5" />
+                    Member Benefits
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <ul className="space-y-3">
-                    {features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-3">
-                        <CheckCircle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
-                        <span className="text-gray-700">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Separator className="my-6" />
-
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Truck className="h-4 w-4 text-amber-500" />
-                    Free shipping included
+                <CardContent className="space-y-6">
+                  <div>
+                    <h4 className="font-semibold text-sm mb-1">Post-Purchase Portal</h4>
+                    <p className="text-xs text-gray-500">Every box unlocks exclusive step-by-step digital instructions tailored to your specific seeds and soil types.</p>
                   </div>
-                  
-                  <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
-                    <RefreshCw className="h-4 w-4 text-amber-500" />
-                    Pause or cancel anytime
+                  <div>
+                    <h4 className="font-semibold text-sm mb-1">Climate Intelligence</h4>
+                    <p className="text-xs text-gray-500">We cross-reference your shipping zone to ensure you only get plants that will thrive in your local area.</p>
                   </div>
-
-                  <Separator className="my-6" />
-
-                  <div className="text-center">
-                    <div className="flex items-baseline justify-center gap-2">
-                      <span className="text-4xl font-bold text-gray-900">$29</span>
-                      <span className="text-gray-500">/month</span>
-                    </div>
-                    <p className="text-sm text-gray-500 mt-1">
-                      Billed monthly, no hidden fees
-                    </p>
+                  <Separator />
+                  <div className="text-center py-4 bg-white rounded-lg shadow-inner">
+                    <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Total Savings</p>
+                    <p className="text-2xl font-bold text-emerald-600">Save Up to 35%</p>
+                    <p className="text-[10px] text-gray-400">vs individual shop purchases</p>
                   </div>
                 </CardContent>
               </Card>
@@ -338,7 +390,9 @@ export default function SubscribePage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">Subscription Payment</CardTitle>
-                  <CardDescription>$29/month - Billed on the same day each month</CardDescription>
+                  <CardDescription>
+                    {selectedPlan === "STANDARD" ? "$29/month" : "$79/month"} - Billed on the same day each month
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {/* PayPal Not Configured Warning */}
@@ -365,7 +419,7 @@ export default function SubscribePage() {
 
                   <div className="flex items-center justify-center gap-2 text-xs text-gray-500 pt-4">
                     <Calendar className="h-3 w-3" />
-                    You&apos;ll be billed $29/month. Cancel anytime from your account.
+                    You&apos;ll be billed {selectedPlan === "STANDARD" ? "$29" : "$79"}/month. Cancel anytime from your account.
                   </div>
                 </CardContent>
               </Card>

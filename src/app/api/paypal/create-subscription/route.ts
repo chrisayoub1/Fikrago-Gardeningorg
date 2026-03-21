@@ -29,9 +29,11 @@ async function getPayPalAccessToken(clientId: string, clientSecret: string, isLi
 }
 
 // Get or create PayPal Plan
-async function getOrCreatePlan(accessToken: string, isLive: boolean): Promise<string> {
+async function getOrCreatePlan(accessToken: string, isLive: boolean, planType: "STANDARD" | "ENTHUSIAST"): Promise<string> {
   const baseUrl = isLive ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com";
-  const planId = `SEED-SOIL-MONTHLY-${isLive ? "LIVE" : "SANDBOX"}`;
+  const amount = planType === "ENTHUSIAST" ? "79.00" : "29.00";
+  const planSuffix = planType === "ENTHUSIAST" ? "ENTHUSIAST" : "STANDARD";
+  const planId = `SEED-SOIL-${planSuffix}-${isLive ? "LIVE" : "SANDBOX"}`;
   
   // Try to get existing plan
   const checkResponse = await fetch(`${baseUrl}/v1/billing/plans/${planId}`, {
@@ -85,8 +87,8 @@ async function getOrCreatePlan(accessToken: string, isLive: boolean): Promise<st
     body: JSON.stringify({
       id: planId,
       product_id: productId,
-      name: "Seed-to-Soil Monthly Subscription",
-      description: "$29/month subscription",
+      name: `Seed-to-Soil ${planType === "ENTHUSIAST" ? "Enthusiast" : "Monthly Starter"} Subscription`,
+      description: `$${amount}/month subscription`,
       status: "ACTIVE",
       billing_cycles: [{
         frequency: { interval_unit: "MONTH", interval_count: 1 },
@@ -94,7 +96,7 @@ async function getOrCreatePlan(accessToken: string, isLive: boolean): Promise<st
         sequence: 1,
         total_cycles: 0,
         pricing_scheme: {
-          fixed_price: { value: "29.00", currency_code: "USD" },
+          fixed_price: { value: amount, currency_code: "USD" },
         },
       }],
       payment_preferences: {
@@ -116,12 +118,13 @@ async function getOrCreatePlan(accessToken: string, isLive: boolean): Promise<st
   
   if (listResponse.ok) {
     const listData = await listResponse.json();
-    if (listData.plans?.length > 0) {
-      return listData.plans[0].id;
+    const foundPlan = listData.plans?.find((p: any) => p.name.includes(planType === "ENTHUSIAST" ? "Enthusiast" : "Monthly Starter"));
+    if (foundPlan) {
+      return foundPlan.id;
     }
   }
   
-  throw new Error("Failed to create or find PayPal plan");
+  throw new Error(`Failed to create or find PayPal plan for ${planType}`);
 }
 
 // POST /api/paypal/create-subscription - Create PayPal subscription
@@ -134,7 +137,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { shippingAddress } = body;
+    const { shippingAddress, selectedPlan = "STANDARD" } = body;
 
     // Get PayPal settings
     const settings = await db.platformSetting.findMany({
@@ -157,7 +160,7 @@ export async function POST(request: NextRequest) {
     const baseUrl = isLive ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com";
 
     // Get or create plan
-    const planId = await getOrCreatePlan(accessToken, isLive);
+    const planId = await getOrCreatePlan(accessToken, isLive, selectedPlan as "STANDARD" | "ENTHUSIAST");
 
     // Create subscription
     const subscriptionData = {
