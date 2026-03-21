@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -56,188 +56,6 @@ import {
   XCircle,
 } from "lucide-react";
 
-// Mock orders data
-const mockOrders = [
-  {
-    id: "ORD-2847",
-    customer: {
-      name: "Sarah Johnson",
-      email: "sarah.j@email.com",
-      phone: "+1 (555) 123-4567",
-    },
-    items: [
-      { name: "Premium Organic Compost Mix", qty: 2, price: 29.99 },
-      { name: "Heirloom Tomato Seeds", qty: 1, price: 19.99 },
-    ],
-    subtotal: 79.97,
-    shipping: 9.99,
-    total: 89.97,
-    vendorEarnings: 67.97,
-    platformFee: 12.00,
-    status: "PENDING",
-    paymentStatus: "PAID",
-    date: "2024-11-15T10:30:00",
-    shippingAddress: {
-      name: "Sarah Johnson",
-      address: "123 Garden Lane",
-      city: "Portland",
-      state: "OR",
-      zip: "97201",
-      country: "USA",
-    },
-    trackingNumber: null,
-    carrier: null,
-  },
-  {
-    id: "ORD-2846",
-    customer: {
-      name: "Mike Chen",
-      email: "mchen@email.com",
-      phone: "+1 (555) 987-6543",
-    },
-    items: [
-      { name: "Organic Fertilizer 5lb", qty: 1, price: 45.99 },
-    ],
-    subtotal: 45.99,
-    shipping: 0,
-    total: 45.99,
-    vendorEarnings: 39.09,
-    platformFee: 6.90,
-    status: "PROCESSING",
-    paymentStatus: "PAID",
-    date: "2024-11-15T09:15:00",
-    shippingAddress: {
-      name: "Mike Chen",
-      address: "456 Bloom Street",
-      city: "Seattle",
-      state: "WA",
-      zip: "98101",
-      country: "USA",
-    },
-    trackingNumber: null,
-    carrier: null,
-  },
-  {
-    id: "ORD-2845",
-    customer: {
-      name: "Emma Williams",
-      email: "emmaw@email.com",
-      phone: "+1 (555) 456-7890",
-    },
-    items: [
-      { name: "Professional Garden Tool Set", qty: 1, price: 49.99 },
-      { name: "Soil pH Test Kit", qty: 2, price: 18.99 },
-      { name: "Bamboo Plant Markers Set", qty: 2, price: 12.99 },
-    ],
-    subtotal: 113.96,
-    shipping: 14.99,
-    total: 128.95,
-    vendorEarnings: 96.87,
-    platformFee: 17.09,
-    status: "SHIPPED",
-    paymentStatus: "PAID",
-    date: "2024-11-14T16:45:00",
-    shippingAddress: {
-      name: "Emma Williams",
-      address: "789 Green Ave",
-      city: "San Francisco",
-      state: "CA",
-      zip: "94102",
-      country: "USA",
-    },
-    trackingNumber: "1Z999AA10123456784",
-    carrier: "UPS",
-  },
-  {
-    id: "ORD-2844",
-    customer: {
-      name: "James Brown",
-      email: "jbrown@email.com",
-      phone: "+1 (555) 234-5678",
-    },
-    items: [
-      { name: "Vermicompost - Worm Castings", qty: 2, price: 34.99 },
-    ],
-    subtotal: 69.98,
-    shipping: 8.02,
-    total: 78.00,
-    vendorEarnings: 59.48,
-    platformFee: 10.50,
-    status: "DELIVERED",
-    paymentStatus: "PAID",
-    date: "2024-11-14T11:20:00",
-    shippingAddress: {
-      name: "James Brown",
-      address: "321 Oak Boulevard",
-      city: "Denver",
-      state: "CO",
-      zip: "80202",
-      country: "USA",
-    },
-    trackingNumber: "9400111899223334445566",
-    carrier: "USPS",
-  },
-  {
-    id: "ORD-2843",
-    customer: {
-      name: "Lisa Garcia",
-      email: "lgarcia@email.com",
-      phone: "+1 (555) 345-6789",
-    },
-    items: [
-      { name: "Drip Irrigation Kit - 50ft", qty: 1, price: 59.99 },
-      { name: "Premium Compost Mix", qty: 2, price: 29.99 },
-    ],
-    subtotal: 119.97,
-    shipping: 4.99,
-    total: 124.96,
-    vendorEarnings: 101.97,
-    platformFee: 18.00,
-    status: "DELIVERED",
-    paymentStatus: "PAID",
-    date: "2024-11-13T14:00:00",
-    shippingAddress: {
-      name: "Lisa Garcia",
-      address: "555 Spruce Road",
-      city: "Austin",
-      state: "TX",
-      zip: "78701",
-      country: "USA",
-    },
-    trackingNumber: "1Z999AA10123456785",
-    carrier: "UPS",
-  },
-  {
-    id: "ORD-2842",
-    customer: {
-      name: "Robert Wilson",
-      email: "rwilson@email.com",
-      phone: "+1 (555) 567-8901",
-    },
-    items: [
-      { name: "Heirloom Tomato Seeds", qty: 3, price: 19.99 },
-    ],
-    subtotal: 59.97,
-    shipping: 5.99,
-    total: 65.96,
-    vendorEarnings: 50.97,
-    platformFee: 9.00,
-    status: "CANCELLED",
-    paymentStatus: "REFUNDED",
-    date: "2024-11-13T09:30:00",
-    shippingAddress: {
-      name: "Robert Wilson",
-      address: "888 Maple Drive",
-      city: "Chicago",
-      state: "IL",
-      zip: "60601",
-      country: "USA",
-    },
-    trackingNumber: null,
-    carrier: null,
-  },
-];
-
 const statusConfig: Record<string, { color: string; icon: typeof Clock; label: string }> = {
   PENDING: { color: "bg-yellow-100 text-yellow-800", icon: Clock, label: "Pending" },
   PROCESSING: { color: "bg-blue-100 text-blue-800", icon: Package, label: "Processing" },
@@ -256,18 +74,37 @@ const paymentStatusColors: Record<string, string> = {
 export default function OrdersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedOrder, setSelectedOrder] = useState<typeof mockOrders[0] | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [trackingInput, setTrackingInput] = useState("");
   const [carrierInput, setCarrierInput] = useState("");
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredOrders = mockOrders.filter((order) => {
+  useEffect(() => {
+    fetch("/api/orders?limit=100")
+      .then(res => res.json())
+      .then(data => {
+        const items = data?.orders || (Array.isArray(data) ? data : []);
+        setOrders(items);
+        setLoading(false);
+      })
+      .catch(() => { setOrders([]); setLoading(false); });
+  }, []);
+
+  const filteredOrders = orders.filter((order: any) => {
     const matchesSearch =
-      order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.customer.email.toLowerCase().includes(searchQuery.toLowerCase());
+      (order.orderNumber || order.id || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (order.buyer?.name || order.shippingFirstName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (order.buyer?.email || "").toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || order.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const pendingCount = orders.filter((o: any) => o.status === "PENDING").length;
+  const processingCount = orders.filter((o: any) => o.status === "PROCESSING").length;
+  const shippedCount = orders.filter((o: any) => o.status === "SHIPPED").length;
+  const deliveredCount = orders.filter((o: any) => o.status === "DELIVERED").length;
+  const cancelledCount = orders.filter((o: any) => o.status === "CANCELLED").length;
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -307,7 +144,7 @@ export default function OrdersPage() {
               <Clock className="h-5 w-5 text-yellow-600" />
               <span className="text-sm font-medium text-gray-600">Pending</span>
             </div>
-            <p className="text-2xl font-bold text-gray-900 mt-2">8</p>
+            <p className="text-2xl font-bold text-gray-900 mt-2">{pendingCount}</p>
           </CardContent>
         </Card>
         <Card className="cursor-pointer hover:border-blue-300 transition-colors" onClick={() => setStatusFilter("PROCESSING")}>
@@ -316,7 +153,7 @@ export default function OrdersPage() {
               <Package className="h-5 w-5 text-blue-600" />
               <span className="text-sm font-medium text-gray-600">Processing</span>
             </div>
-            <p className="text-2xl font-bold text-gray-900 mt-2">4</p>
+            <p className="text-2xl font-bold text-gray-900 mt-2">{processingCount}</p>
           </CardContent>
         </Card>
         <Card className="cursor-pointer hover:border-purple-300 transition-colors" onClick={() => setStatusFilter("SHIPPED")}>
@@ -325,7 +162,7 @@ export default function OrdersPage() {
               <Truck className="h-5 w-5 text-purple-600" />
               <span className="text-sm font-medium text-gray-600">Shipped</span>
             </div>
-            <p className="text-2xl font-bold text-gray-900 mt-2">12</p>
+            <p className="text-2xl font-bold text-gray-900 mt-2">{shippedCount}</p>
           </CardContent>
         </Card>
         <Card className="cursor-pointer hover:border-emerald-300 transition-colors" onClick={() => setStatusFilter("DELIVERED")}>
@@ -334,7 +171,7 @@ export default function OrdersPage() {
               <CheckCircle className="h-5 w-5 text-emerald-600" />
               <span className="text-sm font-medium text-gray-600">Delivered</span>
             </div>
-            <p className="text-2xl font-bold text-gray-900 mt-2">156</p>
+            <p className="text-2xl font-bold text-gray-900 mt-2">{deliveredCount}</p>
           </CardContent>
         </Card>
         <Card className="cursor-pointer hover:border-red-300 transition-colors" onClick={() => setStatusFilter("CANCELLED")}>
@@ -343,7 +180,7 @@ export default function OrdersPage() {
               <XCircle className="h-5 w-5 text-red-600" />
               <span className="text-sm font-medium text-gray-600">Cancelled</span>
             </div>
-            <p className="text-2xl font-bold text-gray-900 mt-2">3</p>
+            <p className="text-2xl font-bold text-gray-900 mt-2">{cancelledCount}</p>
           </CardContent>
         </Card>
       </div>
@@ -396,27 +233,27 @@ export default function OrdersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredOrders.map((order) => (
+              {filteredOrders.map((order: any) => (
                 <TableRow key={order.id} className="cursor-pointer hover:bg-gray-50" onClick={() => setSelectedOrder(order)}>
-                  <TableCell className="font-medium">{order.id}</TableCell>
+                  <TableCell className="font-medium">{order.orderNumber || order.id}</TableCell>
                   <TableCell>
                     <div>
-                      <p className="font-medium text-gray-900">{order.customer.name}</p>
-                      <p className="text-xs text-gray-500">{order.customer.email}</p>
+                      <p className="font-medium text-gray-900">{order.buyer?.name || (order.shippingFirstName + " " + (order.shippingLastName || ""))}</p>
+                      <p className="text-xs text-gray-500">{order.buyer?.email || ""}</p>
                     </div>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
-                    <span className="text-gray-600">{order.items.length} item(s)</span>
+                    <span className="text-gray-600">{order.items?.length || 0} item(s)</span>
                   </TableCell>
-                  <TableCell className="font-medium">${order.total.toFixed(2)}</TableCell>
+                  <TableCell className="font-medium">${Number(order.total || 0).toFixed(2)}</TableCell>
                   <TableCell>{getStatusBadge(order.status)}</TableCell>
                   <TableCell className="hidden lg:table-cell">
-                    <Badge className={`${paymentStatusColors[order.paymentStatus]} border-0`}>
+                    <Badge className={`${paymentStatusColors[order.paymentStatus] || ""} border-0`}>
                       {order.paymentStatus}
                     </Badge>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell text-gray-500">
-                    {new Date(order.date).toLocaleDateString()}
+                    {new Date(order.createdAt || order.date).toLocaleDateString()}
                   </TableCell>
                   <TableCell>
                     <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setSelectedOrder(order); }}>
@@ -441,7 +278,7 @@ export default function OrdersPage() {
                   {getStatusBadge(selectedOrder.status)}
                 </DialogTitle>
                 <DialogDescription>
-                  Placed on {formatDate(selectedOrder.date)}
+                  Placed on {formatDate(selectedOrder.createdAt || selectedOrder.date)}
                 </DialogDescription>
               </DialogHeader>
 
@@ -454,18 +291,18 @@ export default function OrdersPage() {
 
                 <TabsContent value="details" className="space-y-4">
                   <div className="space-y-3">
-                    {selectedOrder.items.map((item, idx) => (
+                    {(selectedOrder.items || []).map((item: any, idx: number) => (
                       <div key={idx} className="flex items-center justify-between py-2 border-b last:border-0">
                         <div className="flex items-center gap-3">
                           <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-emerald-100 to-green-100 flex items-center justify-center">
                             <Package className="h-6 w-6 text-emerald-600" />
                           </div>
                           <div>
-                            <p className="font-medium text-gray-900">{item.name}</p>
-                            <p className="text-sm text-gray-500">Qty: {item.qty}</p>
+                            <p className="font-medium text-gray-900">{item.productName || item.name}</p>
+                            <p className="text-sm text-gray-500">Qty: {item.quantity || item.qty}</p>
                           </div>
                         </div>
-                        <p className="font-medium">${(item.price * item.qty).toFixed(2)}</p>
+                        <p className="font-medium">${(Number(item.price) * (item.quantity || item.qty || 1)).toFixed(2)}</p>
                       </div>
                     ))}
                   </div>
@@ -475,20 +312,20 @@ export default function OrdersPage() {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-500">Subtotal</span>
-                      <span>${selectedOrder.subtotal.toFixed(2)}</span>
+                      <span>{Number(selectedOrder.subtotal || 0).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">Shipping</span>
-                      <span>${selectedOrder.shipping.toFixed(2)}</span>
+                      <span>${Number(selectedOrder.shipping || 0).toFixed(2)}</span>
                     </div>
                     <Separator />
                     <div className="flex justify-between font-semibold text-base">
                       <span>Total</span>
-                      <span>${selectedOrder.total.toFixed(2)}</span>
+                      <span>${Number(selectedOrder.total || 0).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-emerald-600">
                       <span>Your Earnings (85%)</span>
-                      <span className="font-medium">${selectedOrder.vendorEarnings.toFixed(2)}</span>
+                      <span className="font-medium">${Number(selectedOrder.vendorEarnings || 0).toFixed(2)}</span>
                     </div>
                   </div>
                 </TabsContent>
@@ -501,7 +338,7 @@ export default function OrdersPage() {
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Email</p>
-                        <p className="font-medium">{selectedOrder.customer.email}</p>
+                        <p className="font-medium">{selectedOrder.buyer?.email || ""}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -510,7 +347,7 @@ export default function OrdersPage() {
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Phone</p>
-                        <p className="font-medium">{selectedOrder.customer.phone}</p>
+                        <p className="font-medium">{selectedOrder.shippingPhone || ""}</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
@@ -519,11 +356,11 @@ export default function OrdersPage() {
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Shipping Address</p>
-                        <p className="font-medium">{selectedOrder.shippingAddress.name}</p>
+                        <p className="font-medium">{selectedOrder.shippingFirstName} {selectedOrder.shippingLastName}</p>
                         <p className="text-gray-600">
-                          {selectedOrder.shippingAddress.address}<br />
-                          {selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.state} {selectedOrder.shippingAddress.zip}<br />
-                          {selectedOrder.shippingAddress.country}
+                          {selectedOrder.shippingAddress1}<br />
+                          {selectedOrder.shippingCity}, {selectedOrder.shippingState} {selectedOrder.shippingZip}<br />
+                          {selectedOrder.shippingCountry}
                         </p>
                       </div>
                     </div>

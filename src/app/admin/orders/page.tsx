@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -71,334 +71,6 @@ import {
   User,
 } from "lucide-react";
 
-// Mock order data
-const mockOrders = [
-  {
-    id: "ord-2847",
-    orderNumber: "ORD-2847",
-    buyer: {
-      name: "John Smith",
-      email: "john.smith@email.com",
-      phone: "(555) 111-2222",
-    },
-    vendor: {
-      name: "Nature's Best Garden",
-      id: "v1",
-    },
-    items: [
-      { name: "Organic Heirloom Tomato Seeds", quantity: 2, price: 24.99 },
-      { name: "Premium Compost Starter Kit", quantity: 1, price: 49.99 },
-    ],
-    subtotal: 99.97,
-    shipping: 8.99,
-    tax: 8.50,
-    total: 117.46,
-    platformFee: 15.00,
-    vendorEarnings: 84.97,
-    status: "processing",
-    paymentStatus: "paid",
-    paymentMethod: "PayPal",
-    paypalOrderId: "PAYPAL-8X7Y6Z5W",
-    createdAt: "2024-12-08T14:30:00Z",
-    shippingAddress: {
-      street: "123 Garden Ave",
-      city: "Portland",
-      state: "OR",
-      zip: "97201",
-      country: "US",
-    },
-    trackingNumber: null,
-    hasDispute: false,
-    hasRefund: false,
-  },
-  {
-    id: "ord-2846",
-    orderNumber: "ORD-2846",
-    buyer: {
-      name: "Emily Davis",
-      email: "emily.d@email.com",
-      phone: "(555) 222-3333",
-    },
-    vendor: {
-      name: "Green Thumb Supplies",
-      id: "v2",
-    },
-    items: [
-      { name: "Hydroponic LED Grow Light 1000W", quantity: 1, price: 159.99 },
-    ],
-    subtotal: 159.99,
-    shipping: 0,
-    tax: 13.60,
-    total: 173.59,
-    platformFee: 24.00,
-    vendorEarnings: 135.99,
-    status: "shipped",
-    paymentStatus: "paid",
-    paymentMethod: "PayPal",
-    paypalOrderId: "PAYPAL-7Y8X9Z0W",
-    createdAt: "2024-12-07T10:15:00Z",
-    shippingAddress: {
-      street: "456 Urban St",
-      city: "Seattle",
-      state: "WA",
-      zip: "98101",
-      country: "US",
-    },
-    trackingNumber: "1Z999AA10123456784",
-    carrier: "UPS",
-    shippedAt: "2024-12-07T16:00:00Z",
-    hasDispute: false,
-    hasRefund: false,
-  },
-  {
-    id: "ord-2845",
-    orderNumber: "ORD-2845",
-    buyer: {
-      name: "Michael Brown",
-      email: "m.brown@email.com",
-      phone: "(555) 333-4444",
-    },
-    vendor: {
-      name: "Eco Garden Co.",
-      id: "v3",
-    },
-    items: [
-      { name: "Ceramic Self-Watering Planter", quantity: 3, price: 45.99 },
-    ],
-    subtotal: 137.97,
-    shipping: 12.99,
-    tax: 11.73,
-    total: 162.69,
-    platformFee: 20.70,
-    vendorEarnings: 117.27,
-    status: "disputed",
-    paymentStatus: "paid",
-    paymentMethod: "PayPal",
-    paypalOrderId: "PAYPAL-6Z7Y8X9W",
-    createdAt: "2024-12-05T09:45:00Z",
-    shippingAddress: {
-      street: "789 Green Blvd",
-      city: "San Francisco",
-      state: "CA",
-      zip: "94102",
-      country: "US",
-    },
-    trackingNumber: "9400111899223334445566",
-    carrier: "USPS",
-    shippedAt: "2024-12-05T14:00:00Z",
-    hasDispute: true,
-    dispute: {
-      reason: "Item not as described - water reservoir leaks",
-      openedAt: "2024-12-07T10:00:00Z",
-      status: "open",
-      buyerMessage: "The water reservoir on all three planters leaks after filling. This is not mentioned in the product description.",
-    },
-    hasRefund: false,
-  },
-  {
-    id: "ord-2844",
-    orderNumber: "ORD-2844",
-    buyer: {
-      name: "Sarah Wilson",
-      email: "sarah.w@email.com",
-      phone: "(555) 444-5555",
-    },
-    vendor: {
-      name: "Organic Seeds Direct",
-      id: "v4",
-    },
-    items: [
-      { name: "Drought-Resistant Wildflower Mix", quantity: 2, price: 19.99 },
-      { name: "Native Pollinator Seed Mix", quantity: 1, price: 22.99 },
-    ],
-    subtotal: 62.97,
-    shipping: 5.99,
-    tax: 5.35,
-    total: 74.31,
-    platformFee: 9.45,
-    vendorEarnings: 53.52,
-    status: "pending",
-    paymentStatus: "pending",
-    paymentMethod: "PayPal",
-    paypalOrderId: null,
-    createdAt: "2024-12-08T16:00:00Z",
-    shippingAddress: {
-      street: "321 Seed Lane",
-      city: "Denver",
-      state: "CO",
-      zip: "80201",
-      country: "US",
-    },
-    trackingNumber: null,
-    hasDispute: false,
-    hasRefund: false,
-  },
-  {
-    id: "ord-2843",
-    orderNumber: "ORD-2843",
-    buyer: {
-      name: "David Lee",
-      email: "david.lee@email.com",
-      phone: "(555) 555-6666",
-    },
-    vendor: {
-      name: "Terra Nova Gardens",
-      id: "v8",
-    },
-    items: [
-      { name: "Rare Succulent Collection", quantity: 2, price: 79.99 },
-    ],
-    subtotal: 159.98,
-    shipping: 15.99,
-    tax: 13.60,
-    total: 189.57,
-    platformFee: 24.00,
-    vendorEarnings: 135.98,
-    status: "processing",
-    paymentStatus: "paid",
-    paymentMethod: "PayPal",
-    paypalOrderId: "PAYPAL-5X6Y7Z8W",
-    createdAt: "2024-12-06T11:30:00Z",
-    shippingAddress: {
-      street: "555 Tropical Way",
-      city: "Miami",
-      state: "FL",
-      zip: "33101",
-      country: "US",
-    },
-    trackingNumber: null,
-    hasDispute: false,
-    hasRefund: false,
-  },
-  {
-    id: "ord-2842",
-    orderNumber: "ORD-2842",
-    buyer: {
-      name: "Amanda Clark",
-      email: "a.clark@email.com",
-      phone: "(555) 666-7777",
-    },
-    vendor: {
-      name: "Coastal Garden Supply",
-      id: "v10",
-    },
-    items: [
-      { name: "Bamboo Garden Tool Set", quantity: 1, price: 39.99 },
-    ],
-    subtotal: 39.99,
-    shipping: 7.99,
-    tax: 3.40,
-    total: 51.38,
-    platformFee: 6.00,
-    vendorEarnings: 33.99,
-    status: "refunded",
-    paymentStatus: "refunded",
-    paymentMethod: "PayPal",
-    paypalOrderId: "PAYPAL-4W5X6Y7Z",
-    createdAt: "2024-12-04T08:20:00Z",
-    shippingAddress: {
-      street: "888 Beach Dr",
-      city: "San Diego",
-      state: "CA",
-      zip: "92101",
-      country: "US",
-    },
-    trackingNumber: null,
-    hasDispute: false,
-    hasRefund: true,
-    refund: {
-      reason: "Customer requested cancellation before shipping",
-      amount: 51.38,
-      processedAt: "2024-12-04T10:00:00Z",
-      status: "completed",
-    },
-  },
-  {
-    id: "ord-2841",
-    orderNumber: "ORD-2841",
-    buyer: {
-      name: "Robert Taylor",
-      email: "r.taylor@email.com",
-      phone: "(555) 777-8888",
-    },
-    vendor: {
-      name: "Nature's Best Garden",
-      id: "v1",
-    },
-    items: [
-      { name: "Gardening Masterclass PDF Bundle", quantity: 1, price: 19.99 },
-    ],
-    subtotal: 19.99,
-    shipping: 0,
-    tax: 0,
-    total: 19.99,
-    platformFee: 3.00,
-    vendorEarnings: 16.99,
-    status: "delivered",
-    paymentStatus: "paid",
-    paymentMethod: "PayPal",
-    paypalOrderId: "PAYPAL-3Z4W5X6Y",
-    createdAt: "2024-12-03T15:45:00Z",
-    shippingAddress: {
-      street: "222 Digital Ave",
-      city: "Austin",
-      state: "TX",
-      zip: "78701",
-      country: "US",
-    },
-    trackingNumber: null,
-    deliveredAt: "2024-12-03T15:46:00Z",
-    hasDispute: false,
-    hasRefund: false,
-  },
-  {
-    id: "ord-2840",
-    orderNumber: "ORD-2840",
-    buyer: {
-      name: "Jennifer White",
-      email: "j.white@email.com",
-      phone: "(555) 888-9999",
-    },
-    vendor: {
-      name: "Green Thumb Supplies",
-      id: "v2",
-    },
-    items: [
-      { name: "Hydroponic LED Grow Light 1000W", quantity: 1, price: 159.99 },
-      { name: "Premium Potting Soil 25lb Bag", quantity: 2, price: 34.99 },
-    ],
-    subtotal: 229.97,
-    shipping: 25.99,
-    tax: 19.55,
-    total: 275.51,
-    platformFee: 34.50,
-    vendorEarnings: 195.47,
-    status: "disputed",
-    paymentStatus: "paid",
-    paymentMethod: "PayPal",
-    paypalOrderId: "PAYPAL-2Y3Z4W5X",
-    createdAt: "2024-12-02T12:00:00Z",
-    shippingAddress: {
-      street: "999 Grow St",
-      city: "Phoenix",
-      state: "AZ",
-      zip: "85001",
-      country: "US",
-    },
-    trackingNumber: "1Z888AA10123456784",
-    carrier: "UPS",
-    shippedAt: "2024-12-02T18:00:00Z",
-    hasDispute: true,
-    dispute: {
-      reason: "Package damaged during shipping",
-      openedAt: "2024-12-06T09:00:00Z",
-      status: "under_review",
-      buyerMessage: "The grow light arrived with a cracked housing. The soil bags were also torn open during shipping.",
-    },
-    hasRefund: false,
-  },
-];
-
 function getStatusBadge(status: string) {
   switch (status) {
     case "pending":
@@ -438,44 +110,96 @@ function getPaymentStatusBadge(status: string) {
 export default function OrdersOversight() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedOrder, setSelectedOrder] = useState<typeof mockOrders[0] | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showRefundDialog, setShowRefundDialog] = useState(false);
   const [showDisputeDialog, setShowDisputeDialog] = useState(false);
-  const [orderToAction, setOrderToAction] = useState<typeof mockOrders[0] | null>(null);
+  const [orderToAction, setOrderToAction] = useState<any | null>(null);
   const [refundReason, setRefundReason] = useState("");
   const [disputeResponse, setDisputeResponse] = useState("");
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/orders?limit=200")
+      .then(res => res.json())
+      .then(data => {
+        const items = data?.orders || (Array.isArray(data) ? data : []);
+        // Map API fields to display format
+        setOrders(items.map((o: any) => ({
+          id: o.id,
+          orderNumber: o.orderNumber,
+          buyer: {
+            name: o.buyer?.name || (o.shippingFirstName + " " + (o.shippingLastName || "")),
+            email: o.buyer?.email || "",
+            phone: o.shippingPhone || "",
+          },
+          vendor: {
+            name: o.vendor?.vendorProfile?.businessName || o.vendor?.name || "",
+            id: o.vendorId,
+          },
+          items: (o.items || []).map((item: any) => ({
+            name: item.productName || item.product?.name || "Product",
+            quantity: item.quantity || 1,
+            price: item.price || 0,
+          })),
+          subtotal: o.subtotal || 0,
+          shipping: 0,
+          tax: 0,
+          total: o.total || 0,
+          platformFee: o.platformFee || 0,
+          vendorEarnings: o.vendorEarnings || 0,
+          status: (o.status || "").toLowerCase(),
+          paymentStatus: (o.paymentStatus || "").toLowerCase(),
+          paymentMethod: "PayPal",
+          paypalOrderId: o.paypalOrderId || null,
+          createdAt: o.createdAt,
+          shippingAddress: {
+            street: o.shippingAddress1 || "",
+            city: o.shippingCity || "",
+            state: o.shippingState || "",
+            zip: o.shippingZip || "",
+            country: o.shippingCountry || "",
+          },
+          trackingNumber: o.trackingNumber || null,
+          hasDispute: false,
+          hasRefund: (o.status || "").toLowerCase() === "refunded",
+        })));
+        setLoading(false);
+      })
+      .catch(() => { setOrders([]); setLoading(false); });
+  }, []);
 
   // Filter orders
-  const filteredOrders = mockOrders.filter((order) => {
+  const filteredOrders = orders.filter((order: any) => {
     const matchesSearch =
-      order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.buyer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.buyer.email.toLowerCase().includes(searchQuery.toLowerCase());
+      (order.orderNumber || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (order.buyer?.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (order.buyer?.email || "").toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || order.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   // Stats
-  const totalOrders = mockOrders.length;
-  const pendingOrders = mockOrders.filter((o) => o.status === "pending" || o.status === "processing").length;
-  const disputedOrders = mockOrders.filter((o) => o.hasDispute).length;
-  const refundedOrders = mockOrders.filter((o) => o.hasRefund || o.status === "refunded").length;
-  const totalRevenue = mockOrders.filter(o => o.paymentStatus === "paid").reduce((sum, o) => sum + o.total, 0);
-  const totalPlatformFees = mockOrders.filter(o => o.paymentStatus === "paid").reduce((sum, o) => sum + o.platformFee, 0);
+  const totalOrders = orders.length;
+  const pendingOrders = orders.filter((o: any) => o.status === "pending" || o.status === "processing").length;
+  const disputedOrders = orders.filter((o: any) => o.hasDispute).length;
+  const refundedOrders = orders.filter((o: any) => o.hasRefund || o.status === "refunded").length;
+  const totalRevenue = orders.filter((o: any) => o.paymentStatus === "paid").reduce((sum: number, o: any) => sum + Number(o.total || 0), 0);
+  const totalPlatformFees = orders.filter((o: any) => o.paymentStatus === "paid").reduce((sum: number, o: any) => sum + Number(o.platformFee || 0), 0);
 
-  const handleViewOrder = (order: typeof mockOrders[0]) => {
+  const handleViewOrder = (order: any) => {
     setSelectedOrder(order);
     setShowDetailModal(true);
   };
 
-  const handleRefundOrder = (order: typeof mockOrders[0]) => {
+  const handleRefundOrder = (order: any) => {
     setOrderToAction(order);
     setRefundReason("");
     setShowRefundDialog(true);
   };
 
-  const handleResolveDispute = (order: typeof mockOrders[0]) => {
+  const handleResolveDispute = (order: any) => {
     setOrderToAction(order);
     setDisputeResponse("");
     setShowDisputeDialog(true);

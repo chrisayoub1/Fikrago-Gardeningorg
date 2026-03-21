@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -64,192 +64,6 @@ import {
   Plus,
 } from "lucide-react";
 
-// Mock vendor data
-const mockVendors = [
-  {
-    id: "v1",
-    businessName: "Nature's Best Garden",
-    email: "contact@naturesbest.com",
-    phone: "(555) 123-4567",
-    owner: "John Anderson",
-    status: "approved",
-    joinDate: "2024-01-15",
-    totalSales: 45890,
-    totalOrders: 312,
-    commission: 6883.5,
-    products: 45,
-    rating: 4.8,
-    city: "Portland",
-    state: "OR",
-    description: "Premium organic gardening supplies and sustainable products for eco-conscious gardeners.",
-    categories: ["Seeds", "Fertilizers", "Tools"],
-  },
-  {
-    id: "v2",
-    businessName: "Green Thumb Supplies",
-    email: "info@greenthumb.com",
-    phone: "(555) 234-5678",
-    owner: "Sarah Miller",
-    status: "approved",
-    joinDate: "2024-02-20",
-    totalSales: 32450,
-    totalOrders: 198,
-    commission: 4867.5,
-    products: 32,
-    rating: 4.6,
-    city: "Seattle",
-    state: "WA",
-    description: "Specializing in hydroponic systems and indoor gardening solutions.",
-    categories: ["Hydroponics", "Indoor Growing", "Lighting"],
-  },
-  {
-    id: "v3",
-    businessName: "Eco Garden Co.",
-    email: "hello@ecogarden.com",
-    phone: "(555) 345-6789",
-    owner: "Mike Chen",
-    status: "approved",
-    joinDate: "2024-03-10",
-    totalSales: 28750,
-    totalOrders: 156,
-    commission: 4312.5,
-    products: 28,
-    rating: 4.7,
-    city: "San Francisco",
-    state: "CA",
-    description: "Sustainable garden products made from recycled and eco-friendly materials.",
-    categories: ["Pots & Planters", "Composting", "Water Conservation"],
-  },
-  {
-    id: "v4",
-    businessName: "Organic Seeds Direct",
-    email: "seeds@organicdirect.com",
-    phone: "(555) 456-7890",
-    owner: "Emily Watson",
-    status: "pending",
-    joinDate: "2024-12-01",
-    totalSales: 0,
-    totalOrders: 0,
-    commission: 0,
-    products: 15,
-    rating: 0,
-    city: "Denver",
-    state: "CO",
-    description: "Heirloom and organic seeds sourced from certified organic farms.",
-    categories: ["Seeds", "Seedlings", "Rare Varieties"],
-  },
-  {
-    id: "v5",
-    businessName: "Sustainable Roots",
-    email: "grow@sustainableroots.com",
-    phone: "(555) 567-8901",
-    owner: "David Park",
-    status: "pending",
-    joinDate: "2024-12-05",
-    totalSales: 0,
-    totalOrders: 0,
-    commission: 0,
-    products: 22,
-    rating: 0,
-    city: "Austin",
-    state: "TX",
-    description: "Native plants and drought-resistant gardening solutions for sustainable landscapes.",
-    categories: ["Native Plants", "Xeriscaping", "Drought Tolerant"],
-  },
-  {
-    id: "v6",
-    businessName: "Bloom & Grow",
-    email: "info@bloomandgrow.com",
-    phone: "(555) 678-9012",
-    owner: "Lisa Thompson",
-    status: "suspended",
-    joinDate: "2024-04-05",
-    totalSales: 18900,
-    totalOrders: 89,
-    commission: 2835,
-    products: 18,
-    rating: 4.2,
-    city: "Phoenix",
-    state: "AZ",
-    description: "Flower bulbs and flowering plants for vibrant gardens.",
-    categories: ["Flowers", "Bulbs", "Perennials"],
-    suspensionReason: "Policy violation - selling non-organic products as organic",
-  },
-  {
-    id: "v7",
-    businessName: "Urban Garden Solutions",
-    email: "contact@urbangarden.com",
-    phone: "(555) 789-0123",
-    owner: "James Wilson",
-    status: "rejected",
-    joinDate: "2024-11-20",
-    totalSales: 0,
-    totalOrders: 0,
-    commission: 0,
-    products: 0,
-    rating: 0,
-    city: "New York",
-    state: "NY",
-    description: "Urban farming solutions and balcony gardening kits.",
-    categories: ["Urban Farming", "Vertical Gardens", "Small Space"],
-    rejectionReason: "Incomplete business documentation",
-  },
-  {
-    id: "v8",
-    businessName: "Terra Nova Gardens",
-    email: "sales@terranova.com",
-    phone: "(555) 890-1234",
-    owner: "Anna Garcia",
-    status: "approved",
-    joinDate: "2024-05-15",
-    totalSales: 52300,
-    totalOrders: 287,
-    commission: 7845,
-    products: 52,
-    rating: 4.9,
-    city: "Miami",
-    state: "FL",
-    description: "Tropical plants and exotic gardening supplies for warm climates.",
-    categories: ["Tropical Plants", "Exotic Seeds", "Palm Trees"],
-  },
-  {
-    id: "v9",
-    businessName: "Mountain Meadow Seeds",
-    email: "hello@mountainmeadow.com",
-    phone: "(555) 901-2345",
-    owner: "Robert Brown",
-    status: "pending",
-    joinDate: "2024-12-08",
-    totalSales: 0,
-    totalOrders: 0,
-    commission: 0,
-    products: 35,
-    rating: 0,
-    city: "Boise",
-    state: "ID",
-    description: "Wildflower seeds and meadow mixtures for natural landscapes.",
-    categories: ["Wildflowers", "Meadow Mixes", "Pollinator Plants"],
-  },
-  {
-    id: "v10",
-    businessName: "Coastal Garden Supply",
-    email: "info@coastalgarden.com",
-    phone: "(555) 012-3456",
-    owner: "Karen White",
-    status: "approved",
-    joinDate: "2024-06-20",
-    totalSales: 38700,
-    totalOrders: 215,
-    commission: 5805,
-    products: 38,
-    rating: 4.5,
-    city: "San Diego",
-    state: "CA",
-    description: "Salt-tolerant plants and coastal gardening essentials.",
-    categories: ["Coastal Plants", "Salt-Tolerant", "Beach Gardens"],
-  },
-];
-
 function getStatusBadge(status: string) {
   switch (status) {
     case "approved":
@@ -268,45 +82,76 @@ function getStatusBadge(status: string) {
 export default function VendorsManagement() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedVendor, setSelectedVendor] = useState<typeof mockVendors[0] | null>(null);
+  const [selectedVendor, setSelectedVendor] = useState<any | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showApproveDialog, setShowApproveDialog] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [showSuspendDialog, setShowSuspendDialog] = useState(false);
-  const [vendorToAction, setVendorToAction] = useState<typeof mockVendors[0] | null>(null);
+  const [vendorToAction, setVendorToAction] = useState<any | null>(null);
+  const [vendors, setVendors] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/vendors?status=all")
+      .then(res => res.json())
+      .then(data => {
+        const items = Array.isArray(data) ? data : [];
+        // Map API fields to display fields
+        setVendors(items.map((v: any) => ({
+          id: v.id,
+          businessName: v.vendorProfile?.businessName || v.name || "Unknown",
+          email: v.email || v.vendorProfile?.businessEmail || "",
+          phone: v.vendorProfile?.businessPhone || "",
+          owner: v.name || "",
+          status: (v.vendorStatus || "pending").toLowerCase(),
+          joinDate: v.createdAt,
+          totalSales: 0,
+          totalOrders: 0,
+          commission: 0,
+          products: v._count?.products || 0,
+          rating: 0,
+          city: v.vendorProfile?.city || "",
+          state: v.vendorProfile?.state || "",
+          description: v.vendorProfile?.description || "",
+          categories: [],
+        })));
+        setLoading(false);
+      })
+      .catch(() => { setVendors([]); setLoading(false); });
+  }, []);
 
   // Filter vendors
-  const filteredVendors = mockVendors.filter((vendor) => {
+  const filteredVendors = vendors.filter((vendor: any) => {
     const matchesSearch =
-      vendor.businessName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      vendor.owner.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      vendor.email.toLowerCase().includes(searchQuery.toLowerCase());
+      (vendor.businessName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (vendor.owner || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (vendor.email || "").toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || vendor.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   // Stats
-  const totalVendors = mockVendors.length;
-  const approvedVendors = mockVendors.filter((v) => v.status === "approved").length;
-  const pendingVendors = mockVendors.filter((v) => v.status === "pending").length;
-  const suspendedVendors = mockVendors.filter((v) => v.status === "suspended").length;
+  const totalVendors = vendors.length;
+  const approvedVendors = vendors.filter((v: any) => v.status === "approved").length;
+  const pendingVendors = vendors.filter((v: any) => v.status === "pending").length;
+  const suspendedVendors = vendors.filter((v: any) => v.status === "suspended").length;
 
-  const handleViewVendor = (vendor: typeof mockVendors[0]) => {
+  const handleViewVendor = (vendor: any) => {
     setSelectedVendor(vendor);
     setShowDetailModal(true);
   };
 
-  const handleApproveVendor = (vendor: typeof mockVendors[0]) => {
+  const handleApproveVendor = (vendor: any) => {
     setVendorToAction(vendor);
     setShowApproveDialog(true);
   };
 
-  const handleRejectVendor = (vendor: typeof mockVendors[0]) => {
+  const handleRejectVendor = (vendor: any) => {
     setVendorToAction(vendor);
     setShowRejectDialog(true);
   };
 
-  const handleSuspendVendor = (vendor: typeof mockVendors[0]) => {
+  const handleSuspendVendor = (vendor: any) => {
     setVendorToAction(vendor);
     setShowSuspendDialog(true);
   };

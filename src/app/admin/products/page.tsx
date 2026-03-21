@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -66,227 +66,6 @@ import {
   Leaf,
 } from "lucide-react";
 
-// Mock product data
-const mockProducts = [
-  {
-    id: "p1",
-    name: "Organic Heirloom Tomato Seeds Pack",
-    vendor: "Nature's Best Garden",
-    vendorId: "v1",
-    status: "pending_approval",
-    price: 24.99,
-    comparePrice: 29.99,
-    stock: 150,
-    category: "Seeds",
-    createdAt: "2024-12-08",
-    description: "Premium organic heirloom tomato seeds. Includes 5 varieties: Brandywine, Cherokee Purple, Black Krim, Green Zebra, and San Marzano. Non-GMO, certified organic.",
-    images: ["/products/tomato-seeds.jpg"],
-    isFlagged: false,
-    flagReason: null,
-    sku: "NBG-TOM-001",
-    type: "PHYSICAL",
-  },
-  {
-    id: "p2",
-    name: "Premium Compost Starter Kit",
-    vendor: "Eco Garden Co.",
-    vendorId: "v3",
-    status: "pending_approval",
-    price: 49.99,
-    comparePrice: null,
-    stock: 75,
-    category: "Composting",
-    createdAt: "2024-12-07",
-    description: "Everything you need to start composting. Includes compost bin, starter mix, and detailed guide. Made from recycled materials.",
-    images: ["/products/compost-kit.jpg"],
-    isFlagged: false,
-    flagReason: null,
-    sku: "EGC-COM-001",
-    type: "PHYSICAL",
-  },
-  {
-    id: "p3",
-    name: "Hydroponic LED Grow Light 1000W",
-    vendor: "Green Thumb Supplies",
-    vendorId: "v2",
-    status: "pending_approval",
-    price: 159.99,
-    comparePrice: 199.99,
-    stock: 30,
-    category: "Lighting",
-    createdAt: "2024-12-06",
-    description: "Full spectrum LED grow light for indoor gardening. Energy efficient with 50,000 hour lifespan. Includes hanging kit.",
-    images: ["/products/grow-light.jpg"],
-    isFlagged: true,
-    flagReason: "Price seems unusually high compared to similar products",
-    sku: "GTS-LED-001",
-    type: "PHYSICAL",
-  },
-  {
-    id: "p4",
-    name: "Drought-Resistant Wildflower Mix",
-    vendor: "Sustainable Roots",
-    vendorId: "v5",
-    status: "pending_approval",
-    price: 19.99,
-    comparePrice: null,
-    stock: 200,
-    category: "Seeds",
-    createdAt: "2024-12-05",
-    description: "Native wildflower mix designed for drought-prone areas. Contains 15 varieties of native wildflowers.",
-    images: ["/products/wildflower-mix.jpg"],
-    isFlagged: false,
-    flagReason: null,
-    sku: "SR-WF-001",
-    type: "PHYSICAL",
-  },
-  {
-    id: "p5",
-    name: "Organic Pest Control Spray",
-    vendor: "Nature's Best Garden",
-    vendorId: "v1",
-    status: "pending_approval",
-    price: 18.99,
-    comparePrice: 24.99,
-    stock: 100,
-    category: "Pest Control",
-    createdAt: "2024-12-04",
-    description: "All-natural pest control spray made from neem oil and essential oils. Safe for organic gardens and beneficial insects.",
-    images: ["/products/pest-spray.jpg"],
-    isFlagged: true,
-    flagReason: "Contains claims that need verification - 'Safe for beneficial insects'",
-    sku: "NBG-PEST-001",
-    type: "PHYSICAL",
-  },
-  {
-    id: "p6",
-    name: "Gardening Masterclass PDF Bundle",
-    vendor: "Nature's Best Garden",
-    vendorId: "v1",
-    status: "active",
-    price: 19.99,
-    comparePrice: null,
-    stock: 999,
-    category: "Digital",
-    createdAt: "2024-11-20",
-    description: "Complete gardening guide with 5 PDF modules covering soil health, pest management, seed starting, and more.",
-    images: ["/products/masterclass.jpg"],
-    isFlagged: false,
-    flagReason: null,
-    sku: "NBG-DIG-001",
-    type: "DIGITAL",
-  },
-  {
-    id: "p7",
-    name: "Premium Potting Soil 25lb Bag",
-    vendor: "Eco Garden Co.",
-    vendorId: "v3",
-    status: "active",
-    price: 34.99,
-    comparePrice: null,
-    stock: 85,
-    category: "Soil",
-    createdAt: "2024-11-15",
-    description: "Premium organic potting soil with added perlite for drainage. Ideal for container gardening.",
-    images: ["/products/potting-soil.jpg"],
-    isFlagged: false,
-    flagReason: null,
-    sku: "EGC-SOIL-001",
-    type: "PHYSICAL",
-  },
-  {
-    id: "p8",
-    name: "Ceramic Self-Watering Planter",
-    vendor: "Bloom & Grow",
-    vendorId: "v6",
-    status: "flagged",
-    price: 45.99,
-    comparePrice: 59.99,
-    stock: 25,
-    category: "Pots & Planters",
-    createdAt: "2024-10-10",
-    description: "Beautiful ceramic planter with self-watering system. Available in 3 colors.",
-    images: ["/products/planter.jpg"],
-    isFlagged: true,
-    flagReason: "Customer complaints - quality issues with water reservoir",
-    sku: "BG-PLAN-001",
-    type: "PHYSICAL",
-  },
-  {
-    id: "p9",
-    name: "Vertical Garden Wall Kit",
-    vendor: "Urban Garden Solutions",
-    vendorId: "v7",
-    status: "rejected",
-    price: 89.99,
-    comparePrice: null,
-    stock: 0,
-    category: "Vertical Gardens",
-    createdAt: "2024-11-25",
-    description: "Modular vertical garden system for walls. Includes 12 planter pockets and irrigation system.",
-    images: ["/products/vertical-kit.jpg"],
-    isFlagged: false,
-    flagReason: null,
-    sku: "UGS-VERT-001",
-    type: "PHYSICAL",
-    rejectionReason: "Vendor account rejected - incomplete documentation",
-  },
-  {
-    id: "p10",
-    name: "Rare Succulent Collection",
-    vendor: "Terra Nova Gardens",
-    vendorId: "v8",
-    status: "active",
-    price: 79.99,
-    comparePrice: 99.99,
-    stock: 15,
-    category: "Plants",
-    createdAt: "2024-12-01",
-    description: "Collection of 6 rare succulents. Each plant comes in a 2-inch pot with care instructions.",
-    images: ["/products/succulents.jpg"],
-    isFlagged: false,
-    flagReason: null,
-    sku: "TNG-SUC-001",
-    type: "PHYSICAL",
-  },
-  {
-    id: "p11",
-    name: "Native Pollinator Seed Mix",
-    vendor: "Mountain Meadow Seeds",
-    vendorId: "v9",
-    status: "pending_approval",
-    price: 22.99,
-    comparePrice: null,
-    stock: 180,
-    category: "Seeds",
-    createdAt: "2024-12-08",
-    description: "Specially formulated mix to attract bees, butterflies, and other pollinators. Covers 500 sq ft.",
-    images: ["/products/pollinator-mix.jpg"],
-    isFlagged: false,
-    flagReason: null,
-    sku: "MMS-POL-001",
-    type: "PHYSICAL",
-  },
-  {
-    id: "p12",
-    name: "Bamboo Garden Tool Set",
-    vendor: "Coastal Garden Supply",
-    vendorId: "v10",
-    status: "active",
-    price: 39.99,
-    comparePrice: 49.99,
-    stock: 40,
-    category: "Tools",
-    createdAt: "2024-11-28",
-    description: "Sustainable bamboo tool set with 6 essential garden tools. Includes ergonomic handles and storage bag.",
-    images: ["/products/bamboo-tools.jpg"],
-    isFlagged: false,
-    flagReason: null,
-    sku: "CGS-TOOL-001",
-    type: "PHYSICAL",
-  },
-];
-
 function getStatusBadge(status: string) {
   switch (status) {
     case "active":
@@ -307,48 +86,61 @@ function getStatusBadge(status: string) {
 export default function ProductsModeration() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedProduct, setSelectedProduct] = useState<typeof mockProducts[0] | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showApproveDialog, setShowApproveDialog] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [showFlagDialog, setShowFlagDialog] = useState(false);
-  const [productToAction, setProductToAction] = useState<typeof mockProducts[0] | null>(null);
+  const [productToAction, setProductToAction] = useState<any | null>(null);
   const [flagReason, setFlagReason] = useState("");
   const [rejectReason, setRejectReason] = useState("");
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/products?limit=200")
+      .then(res => res.json())
+      .then(data => {
+        const items = data?.products || (Array.isArray(data) ? data : []);
+        setProducts(items);
+        setLoading(false);
+      })
+      .catch(() => { setProducts([]); setLoading(false); });
+  }, []);
 
   // Filter products
-  const filteredProducts = mockProducts.filter((product) => {
+  const filteredProducts = products.filter((product: any) => {
     const matchesSearch =
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.vendor.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.sku.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === "all" || product.status === statusFilter;
+      (product.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (product.vendor?.name || product.vendor || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (product.sku || "").toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === "all" || (product.status || "").toLowerCase() === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   // Stats
-  const totalProducts = mockProducts.length;
-  const pendingProducts = mockProducts.filter((p) => p.status === "pending_approval").length;
-  const activeProducts = mockProducts.filter((p) => p.status === "active").length;
-  const flaggedProducts = mockProducts.filter((p) => p.isFlagged || p.status === "flagged").length;
+  const totalProducts = products.length;
+  const pendingProducts = products.filter((p: any) => (p.status || "").toLowerCase() === "pending_approval" || p.status === "PENDING_APPROVAL").length;
+  const activeProducts = products.filter((p: any) => (p.status || "").toLowerCase() === "active" || p.status === "ACTIVE").length;
+  const flaggedProducts = products.filter((p: any) => p.isFlagged || (p.status || "").toLowerCase() === "flagged").length;
 
-  const handleViewProduct = (product: typeof mockProducts[0]) => {
+  const handleViewProduct = (product: any) => {
     setSelectedProduct(product);
     setShowDetailModal(true);
   };
 
-  const handleApproveProduct = (product: typeof mockProducts[0]) => {
+  const handleApproveProduct = (product: any) => {
     setProductToAction(product);
     setShowApproveDialog(true);
   };
 
-  const handleRejectProduct = (product: typeof mockProducts[0]) => {
+  const handleRejectProduct = (product: any) => {
     setProductToAction(product);
     setRejectReason("");
     setShowRejectDialog(true);
   };
 
-  const handleFlagProduct = (product: typeof mockProducts[0]) => {
+  const handleFlagProduct = (product: any) => {
     setProductToAction(product);
     setFlagReason(product.flagReason || "");
     setShowFlagDialog(true);

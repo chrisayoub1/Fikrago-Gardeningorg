@@ -56,106 +56,6 @@ import {
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
-// Mock products data
-const mockProducts = [
-  {
-    id: "prod_001",
-    name: "Premium Organic Compost Mix",
-    sku: "POC-001",
-    price: 29.99,
-    comparePrice: 34.99,
-    stock: 156,
-    status: "ACTIVE",
-    category: "Soil Amendments",
-    sales: 234,
-    image: null,
-  },
-  {
-    id: "prod_002",
-    name: "Heirloom Tomato Seeds - Mixed Variety",
-    sku: "HTS-002",
-    price: 19.99,
-    comparePrice: null,
-    stock: 89,
-    status: "ACTIVE",
-    category: "Seeds",
-    sales: 189,
-    image: null,
-  },
-  {
-    id: "prod_003",
-    name: "Organic Fertilizer 5lb Bag",
-    sku: "OFS-003",
-    price: 24.99,
-    comparePrice: 29.99,
-    stock: 0,
-    status: "OUT_OF_STOCK",
-    category: "Fertilizers",
-    sales: 156,
-    image: null,
-  },
-  {
-    id: "prod_004",
-    name: "Professional Garden Tool Set",
-    sku: "GTS-004",
-    price: 49.99,
-    comparePrice: null,
-    stock: 42,
-    status: "ACTIVE",
-    category: "Tools",
-    sales: 98,
-    image: null,
-  },
-  {
-    id: "prod_005",
-    name: "Soil pH Test Kit",
-    sku: "SPT-005",
-    price: 18.99,
-    comparePrice: 22.99,
-    stock: 67,
-    status: "ACTIVE",
-    category: "Tools",
-    sales: 87,
-    image: null,
-  },
-  {
-    id: "prod_006",
-    name: "Bamboo Plant Markers Set (50pcs)",
-    sku: "BPM-006",
-    price: 12.99,
-    comparePrice: null,
-    stock: 234,
-    status: "DRAFT",
-    category: "Accessories",
-    sales: 0,
-    image: null,
-  },
-  {
-    id: "prod_007",
-    name: "Vermicompost - Worm Castings 10lb",
-    sku: "VWC-007",
-    price: 34.99,
-    comparePrice: 39.99,
-    stock: 78,
-    status: "ACTIVE",
-    category: "Soil Amendments",
-    sales: 145,
-    image: null,
-  },
-  {
-    id: "prod_008",
-    name: "Drip Irrigation Kit - 50ft",
-    sku: "DIK-008",
-    price: 59.99,
-    comparePrice: null,
-    stock: 23,
-    status: "ACTIVE",
-    category: "Irrigation",
-    sales: 67,
-    image: null,
-  },
-];
-
 const statusColors: Record<string, { bg: string; text: string }> = {
   ACTIVE: { bg: "bg-emerald-100", text: "text-emerald-800" },
   DRAFT: { bg: "bg-gray-100", text: "text-gray-800" },
@@ -163,46 +63,45 @@ const statusColors: Record<string, { bg: string; text: string }> = {
   PENDING_APPROVAL: { bg: "bg-yellow-100", text: "text-yellow-800" },
 };
 
-const categories = [
-  "Soil Amendments",
-  "Seeds",
-  "Fertilizers",
-  "Tools",
-  "Accessories",
-  "Irrigation",
-  "Pest Control",
-  "Planters",
-];
-
 export default function ProductsPage() {
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<typeof mockProducts[0] | null>(null);
+  const [editingProduct, setEditingProduct] = useState<any | null>(null);
   const [realCategories, setRealCategories] = useState<{id: string, name: string}[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Fetch categories
     fetch("/api/categories")
       .then(res => res.json())
+      .then(data => setRealCategories(Array.isArray(data) ? data : []))
+      .catch(() => setRealCategories([]));
+
+    // Fetch vendor's own products
+    fetch("/api/products?limit=100")
+      .then(res => res.json())
       .then(data => {
-        setRealCategories(Array.isArray(data) ? data : []);
+        const items = data?.products || (Array.isArray(data) ? data : []);
+        setProducts(items);
         setLoading(false);
       })
-      .catch(err => {
-        console.error("Error fetching categories:", err);
-        setRealCategories([]);
-        setLoading(false);
-      });
+      .catch(() => { setProducts([]); setLoading(false); });
   }, []);
 
-  const filteredProducts = mockProducts.filter((product) => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.sku.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredProducts = products.filter((product: any) => {
+    const matchesSearch = (product.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (product.sku || "").toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || product.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const totalProducts = products.length;
+  const activeProducts = products.filter((p: any) => p.status === "ACTIVE").length;
+  const draftProducts = products.filter((p: any) => p.status === "DRAFT").length;
+  const outOfStockProducts = products.filter((p: any) => p.status === "OUT_OF_STOCK" || p.stock === 0).length;
 
   const toggleSelectAll = () => {
     if (selectedProducts.length === filteredProducts.length) {
@@ -258,25 +157,25 @@ export default function ProductsPage() {
       <div className="grid gap-4 sm:grid-cols-4">
         <Card>
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-gray-900">24</div>
+            <div className="text-2xl font-bold text-gray-900">{totalProducts}</div>
             <p className="text-sm text-gray-500">Total Products</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-emerald-600">18</div>
+            <div className="text-2xl font-bold text-emerald-600">{activeProducts}</div>
             <p className="text-sm text-gray-500">Active</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-gray-600">4</div>
+            <div className="text-2xl font-bold text-gray-600">{draftProducts}</div>
             <p className="text-sm text-gray-500">Drafts</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-red-600">2</div>
+            <div className="text-2xl font-bold text-red-600">{outOfStockProducts}</div>
             <p className="text-sm text-gray-500">Out of Stock</p>
           </CardContent>
         </Card>
@@ -365,7 +264,7 @@ export default function ProductsPage() {
                       </div>
                       <div className="min-w-0">
                         <p className="font-medium text-gray-900 truncate">{product.name}</p>
-                        <p className="text-xs text-gray-500">{product.category}</p>
+                        <p className="text-xs text-gray-500">{product.category?.name || product.category || ""}</p>
                       </div>
                     </div>
                   </TableCell>
@@ -374,7 +273,7 @@ export default function ProductsPage() {
                   </TableCell>
                   <TableCell>
                     <div>
-                      <p className="font-medium text-gray-900">${product.price.toFixed(2)}</p>
+                      <p className="font-medium text-gray-900">${Number(product.price || 0).toFixed(2)}</p>
                       {product.comparePrice && (
                         <p className="text-xs text-gray-400 line-through">
                           ${product.comparePrice.toFixed(2)}
@@ -395,7 +294,7 @@ export default function ProductsPage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="hidden lg:table-cell text-gray-500">
-                    {product.sales}
+                    {product.totalSales || 0}
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
