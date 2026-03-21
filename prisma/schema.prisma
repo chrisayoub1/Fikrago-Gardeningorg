@@ -140,6 +140,11 @@ model VendorProfile {
   rating          Float    @default(0)
   reviewCount     Int      @default(0)
   
+  // B2B & Vetting
+  isVetted        Boolean  @default(false)
+  vettingDate     DateTime?
+  businessType    String?  // "SHOP", "LANDSCAPER", "BOUTIQUE"
+  
   // Timestamps
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -228,6 +233,14 @@ model Product {
   rating          Float         @default(0)
   reviewCount     Int           @default(0)
   totalSales      Int           @default(0)
+  
+  // B2B & Bulk Pricing
+  bulkPrice       Float?        // Price for bulk orders
+  minOrderQuantity Int?         @default(1)
+  
+  // Climate Personalization
+  climateZone     String?       // "ALL", "ZONE_1", "ZONE_2", etc.
+  growingSeason   String?       // "SPRING", "SUMMER", "FALL", "WINTER"
   
   // Timestamps
   createdAt       DateTime      @default(now())
@@ -478,6 +491,9 @@ model Subscription {
   // Email tracking
   confirmationEmailSent Boolean     @default(false)
   lastEmailSentAt      DateTime?
+  
+  // Post-Purchase Success Content
+  successContentUrl   String?     // Link to digital instructions/guides
   
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
